@@ -1,4 +1,5 @@
 streamlit
-sumy
-nltk
+transformers
+torch
+sentencepiece
 

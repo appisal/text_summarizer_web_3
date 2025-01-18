@@ -1,23 +1,22 @@
-import os
-import nltk
 import streamlit as st
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer
+from transformers import pipeline
+import torch
 
-# Ensure nltk punkt tokenizer is available
-try:
-    nltk.data.find("tokenizers/punkt")
-except LookupError:
-    nltk.download("punkt")
+# Check for GPU availability
+device = 0 if torch.cuda.is_available() else -1
+
+# Initialize the summarization pipeline
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
 
 # Function to summarize text
-def summarize_text(text, num_sentences):
-    parser = PlaintextParser.from_string(text, Tokenizer("english"))
-    summarizer = LsaSummarizer()
-    summary = summarizer(parser.document, num_sentences)
-    summarized_text = " ".join(str(sentence) for sentence in summary)
-    return summarized_text
+def summarize_text(text, max_length, min_length):
+    summary = summarizer(
+        text,
+        max_length=max_length,
+        min_length=min_length,
+        do_sample=False,
+    )
+    return summary[0]["summary_text"]
 
 # Streamlit App
 st.title("Text Summarizer")
@@ -31,28 +30,30 @@ if uploaded_file:
     st.write("Uploaded Text:")
     st.text_area("Original Text", value=text, height=200)
 
-    # Summary Slider
-    num_sentences = st.slider("Number of sentences for the summary:", 1, 10, 3)
+    # Summary Length Sliders
+    max_length = st.slider("Max summary length (words):", 50, 500, 200)
+    min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
     # Generate Summary
     if st.button("Summarize"):
-        summary = summarize_text(text, num_sentences)
-        st.subheader("Summary:")
-        st.write(summary)
+        try:
+            summary = summarize_text(text, max_length, min_length)
+            st.subheader("Summary:")
+            st.write(summary)
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
 
 # Text Input Section
 else:
     text = st.text_area("Paste your text here:", height=200)
-    num_sentences = st.slider("Number of sentences for the summary:", 1, 10, 3)
+    max_length = st.slider("Max summary length (words):", 50, 500, 200)
+    min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
     # Generate Summary
     if st.button("Summarize"):
-        summary = summarize_text(text, num_sentences)
-        st.subheader("Summary:")
-        st.write(summary)
-
-# Dynamically set the port for Render
-port = int(os.environ.get("PORT", 8501))
-if __name__ == "__main__":
-    import subprocess
-    subprocess.run(["streamlit", "run", "app.py", "--server.port", str(port)])
+        try:
+            summary = summarize_text(text, max_length, min_length)
+            st.subheader("Summary:")
+            st.write(summary)
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")

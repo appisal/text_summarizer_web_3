@@ -1,14 +1,15 @@
+import os
+import nltk
 import streamlit as st
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
-import nltk
 
-# Download punkt tokenizer
-nltk.download('punkt')
-
-# Add punkt tokenizer to the path if needed
-nltk.data.path.append('./nltk_data')
+# Ensure nltk punkt tokenizer is available
+try:
+    nltk.data.find("tokenizers/punkt")
+except LookupError:
+    nltk.download("punkt")
 
 # Function to summarize text
 def summarize_text(text, num_sentences):
@@ -49,3 +50,9 @@ else:
         summary = summarize_text(text, num_sentences)
         st.subheader("Summary:")
         st.write(summary)
+
+# Dynamically set the port for Render
+port = int(os.environ.get("PORT", 8501))
+if __name__ == "__main__":
+    import subprocess
+    subprocess.run(["streamlit", "run", "app.py", "--server.port", str(port)])

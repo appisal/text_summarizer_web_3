@@ -6,10 +6,16 @@ import torch
 device = 0 if torch.cuda.is_available() else -1
 
 # Initialize the summarization pipeline
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
+@st.cache_resource  # Cache the model to reduce loading time
+def load_summarizer():
+    return pipeline("summarization", model="facebook/bart-large-cnn", device=device)
+
+summarizer = load_summarizer()
 
 # Function to summarize text
 def summarize_text(text, max_length, min_length):
+    if len(text.split()) < min_length:
+        return "Input text is too short to summarize."
     summary = summarizer(
         text,
         max_length=max_length,
@@ -34,14 +40,17 @@ if uploaded_file:
     max_length = st.slider("Max summary length (words):", 50, 500, 200)
     min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
-    # Generate Summary
-    if st.button("Summarize"):
-        try:
-            summary = summarize_text(text, max_length, min_length)
-            st.subheader("Summary:")
-            st.write(summary)
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+    if max_length <= min_length:
+        st.error("Max length must be greater than Min length.")
+    else:
+        # Generate Summary
+        if st.button("Summarize"):
+            try:
+                summary = summarize_text(text, max_length, min_length)
+                st.subheader("Summary:")
+                st.write(summary)
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
 
 # Text Input Section
 else:
@@ -49,11 +58,16 @@ else:
     max_length = st.slider("Max summary length (words):", 50, 500, 200)
     min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
-    # Generate Summary
-    if st.button("Summarize"):
-        try:
-            summary = summarize_text(text, max_length, min_length)
-            st.subheader("Summary:")
-            st.write(summary)
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+    if max_length <= min_length:
+        st.error("Max length must be greater than Min length.")
+    elif not text.strip():
+        st.warning("Please provide some text to summarize.")
+    else:
+        # Generate Summary
+        if st.button("Summarize"):
+            try:
+                summary = summarize_text(text, max_length, min_length)
+                st.subheader("Summary:")
+                st.write(summary)
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")

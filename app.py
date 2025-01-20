@@ -49,6 +49,14 @@ if uploaded_file:
                 summary = summarize_text(text, max_length, min_length)
                 st.subheader("Summary:")
                 st.write(summary)
+
+                # Download Button
+                st.download_button(
+                    label="Download Summary",
+                    data=summary,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
 
@@ -69,5 +77,13 @@ else:
                 summary = summarize_text(text, max_length, min_length)
                 st.subheader("Summary:")
                 st.write(summary)
+
+                # Download Button
+                st.download_button(
+                    label="Download Summary",
+                    data=summary,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")

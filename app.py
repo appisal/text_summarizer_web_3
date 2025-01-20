@@ -1,6 +1,9 @@
 import streamlit as st
 from transformers import pipeline
 import torch
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
@@ -23,6 +26,21 @@ def summarize_text(text, max_length, min_length):
         do_sample=False,
     )
     return summary[0]["summary_text"]
+
+# Function to create a PDF
+def create_pdf(summary):
+    buffer = BytesIO()
+    pdf_canvas = canvas.Canvas(buffer, pagesize=letter)
+    pdf_canvas.setFont("Helvetica", 12)
+    pdf_canvas.drawString(30, 750, "Summary:")
+    text_obj = pdf_canvas.beginText(30, 730)
+    text_obj.setFont("Helvetica", 10)
+    for line in summary.split("\n"):
+        text_obj.textLine(line)
+    pdf_canvas.drawText(text_obj)
+    pdf_canvas.save()
+    buffer.seek(0)
+    return buffer
 
 # Streamlit App
 st.title("Text Summarizer")
@@ -50,12 +68,13 @@ if uploaded_file:
                 st.subheader("Summary:")
                 st.write(summary)
 
-                # Download Button
+                # Download PDF Button
+                pdf_data = create_pdf(summary)
                 st.download_button(
-                    label="Download Summary",
-                    data=summary,
-                    file_name="summary.txt",
-                    mime="text/plain",
+                    label="Download Summary as PDF",
+                    data=pdf_data,
+                    file_name="summary.pdf",
+                    mime="application/pdf",
                 )
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
@@ -78,12 +97,13 @@ else:
                 st.subheader("Summary:")
                 st.write(summary)
 
-                # Download Button
+                # Download PDF Button
+                pdf_data = create_pdf(summary)
                 st.download_button(
-                    label="Download Summary",
-                    data=summary,
-                    file_name="summary.txt",
-                    mime="text/plain",
+                    label="Download Summary as PDF",
+                    data=pdf_data,
+                    file_name="summary.pdf",
+                    mime="application/pdf",
                 )
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")

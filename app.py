@@ -4,6 +4,9 @@ import torch
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from docx import Document
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
@@ -42,6 +45,20 @@ def create_pdf(summary):
     buffer.seek(0)
     return buffer
 
+# Function to create a TXT file
+def create_txt(summary):
+    return BytesIO(summary.encode())
+
+# Function to create a DOCX file
+def create_docx(summary):
+    doc = Document()
+    doc.add_heading("Summary", level=1)
+    doc.add_paragraph(summary)
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
 # Streamlit App
 st.title("Text Summarizer")
 
@@ -53,6 +70,10 @@ if uploaded_file:
     text = uploaded_file.read().decode("utf-8")
     st.write("Uploaded Text:")
     st.text_area("Original Text", value=text, height=200)
+
+    # Word and Character Count
+    st.write(f"Word Count: {len(text.split())}")
+    st.write(f"Character Count: {len(text)}")
 
     # Summary Length Sliders
     max_length = st.slider("Max summary length (words):", 50, 500, 200)
@@ -76,12 +97,43 @@ if uploaded_file:
                     file_name="summary.pdf",
                     mime="application/pdf",
                 )
+
+                # Download TXT Button
+                txt_data = create_txt(summary)
+                st.download_button(
+                    label="Download Summary as TXT",
+                    data=txt_data,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
+
+                # Download DOCX Button
+                docx_data = create_docx(summary)
+                st.download_button(
+                    label="Download Summary as DOCX",
+                    data=docx_data,
+                    file_name="summary.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+
+                # Generate Word Cloud
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+                fig, ax = plt.subplots()
+                ax.imshow(wordcloud, interpolation="bilinear")
+                ax.axis("off")
+                st.pyplot(fig)
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
 
 # Text Input Section
 else:
     text = st.text_area("Paste your text here:", height=200)
+
+    # Word and Character Count
+    if text.strip():
+        st.write(f"Word Count: {len(text.split())}")
+        st.write(f"Character Count: {len(text)}")
+
     max_length = st.slider("Max summary length (words):", 50, 500, 200)
     min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
@@ -105,5 +157,30 @@ else:
                     file_name="summary.pdf",
                     mime="application/pdf",
                 )
+
+                # Download TXT Button
+                txt_data = create_txt(summary)
+                st.download_button(
+                    label="Download Summary as TXT",
+                    data=txt_data,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
+
+                # Download DOCX Button
+                docx_data = create_docx(summary)
+                st.download_button(
+                    label="Download Summary as DOCX",
+                    data=docx_data,
+                    file_name="summary.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+
+                # Generate Word Cloud
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+                fig, ax = plt.subplots()
+                ax.imshow(wordcloud, interpolation="bilinear")
+                ax.axis("off")
+                st.pyplot(fig)
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")

@@ -4,3 +4,4 @@ streamlit
 reportlab
 wordcloud
 matplotlib
+python-docx

@@ -1,11 +1,11 @@
 streamlit
-torch
 transformers
+torch
 reportlab
 wordcloud
 matplotlib
 python-docx
-gtts
 keybert
-beautifulsoup4
-requests
+gtts
+scikit-learn
+numpy

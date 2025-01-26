@@ -9,25 +9,23 @@ import matplotlib.pyplot as plt
 from docx import Document
 from gtts import gTTS
 from keybert import KeyBERT
-from bs4 import BeautifulSoup
-import requests
-from zipfile import ZipFile
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
 
-# Load summarizer and sentiment analysis pipelines
-@st.cache_resource
+# Initialize the summarization pipeline
+@st.cache_resource  # Cache the model to reduce loading time
 def load_summarizer():
     return pipeline("summarization", model="facebook/bart-large-cnn", device=device)
 
-@st.cache_resource
-def load_sentiment_analyzer():
-    return pipeline("sentiment-analysis", device=device)
-
 summarizer = load_summarizer()
-sentiment_analyzer = load_sentiment_analyzer()
-keyword_extractor = KeyBERT()
+
+# Initialize KeyBERT for keyword extraction
+@st.cache_resource
+def load_keybert():
+    return KeyBERT()
+
+keybert_model = load_keybert()
 
 # Function to summarize text
 def summarize_text(text, max_length, min_length):
@@ -41,14 +39,12 @@ def summarize_text(text, max_length, min_length):
     )
     return summary[0]["summary_text"]
 
-# Function to extract text from URL
-def extract_text_from_url(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    paragraphs = soup.find_all("p")
-    return " ".join([p.text for p in paragraphs])
+# Function to extract keywords
+def extract_keywords(text, top_n=5):
+    keywords = keybert_model.extract_keywords(text, top_n=top_n)
+    return [kw[0] for kw in keywords]
 
-# Function to create files (PDF, TXT, DOCX)
+# Function to create a PDF
 def create_pdf(summary):
     buffer = BytesIO()
     pdf_canvas = canvas.Canvas(buffer, pagesize=letter)
@@ -63,9 +59,11 @@ def create_pdf(summary):
     buffer.seek(0)
     return buffer
 
+# Function to create a TXT file
 def create_txt(summary):
     return BytesIO(summary.encode())
 
+# Function to create a DOCX file
 def create_docx(summary):
     doc = Document()
     doc.add_heading("Summary", level=1)
@@ -75,102 +73,154 @@ def create_docx(summary):
     buffer.seek(0)
     return buffer
 
-# Function to create audio
-def text_to_speech(summary):
-    tts = gTTS(summary, lang="en")
-    buffer = BytesIO()
-    tts.write_to_fp(buffer)
-    buffer.seek(0)
-    return buffer
-
 # Streamlit App
-st.title("Text Summarizer - Enhanced")
+st.title("Text Summarizer")
 
-st.sidebar.title("Features")
-option = st.sidebar.radio(
-    "Choose an option:",
-    ["Single File", "Multiple Files", "URL", "Compare Texts"]
-)
+st.write("Upload a text file or paste text below to summarize it.")
 
-# Single File Summarization
-if option == "Single File":
-    st.write("Upload a text file or paste text below to summarize it.")
+# File Upload Section
+uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
+if uploaded_file:
+    text = uploaded_file.read().decode("utf-8")
+    st.write("Uploaded Text:")
+    st.text_area("Original Text", value=text, height=200)
 
-    uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
-    if uploaded_file:
-        text = uploaded_file.read().decode("utf-8")
+    # Word and Character Count
+    st.write(f"Word Count: {len(text.split())}")
+    st.write(f"Character Count: {len(text)}")
+
+    # Summary Length Sliders
+    max_length = st.slider("Max summary length (words):", 50, 500, 200)
+    min_length = st.slider("Min summary length (words):", 10, 100, 50)
+
+    if max_length <= min_length:
+        st.error("Max length must be greater than Min length.")
     else:
-        text = st.text_area("Paste your text here:", height=200)
+        # Generate Summary
+        if st.button("Summarize"):
+            try:
+                summary = summarize_text(text, max_length, min_length)
+                st.subheader("Summary:")
+                st.write(summary)
 
+                # Extract Keywords
+                st.subheader("Extracted Keywords:")
+                keywords = extract_keywords(summary)
+                st.write(", ".join(keywords))
+
+                # Generate Word Cloud
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+                fig, ax = plt.subplots()
+                ax.imshow(wordcloud, interpolation="bilinear")
+                ax.axis("off")
+                st.pyplot(fig)
+
+                # Download Options
+                st.subheader("Download Files:")
+                col1, col2, col3 = st.columns(3)
+
+                # PDF Download Button
+                with col1:
+                    pdf_data = create_pdf(summary)
+                    st.download_button(
+                        label="Download PDF",
+                        data=pdf_data,
+                        file_name="summary.pdf",
+                        mime="application/pdf",
+                    )
+
+                # DOCX Download Button
+                with col2:
+                    docx_data = create_docx(summary)
+                    st.download_button(
+                        label="Download DOCX",
+                        data=docx_data,
+                        file_name="summary.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+
+                # TXT Download Button
+                with col3:
+                    txt_data = create_txt(summary)
+                    st.download_button(
+                        label="Download TXT",
+                        data=txt_data,
+                        file_name="summary.txt",
+                        mime="text/plain",
+                    )
+
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+
+# Text Input Section
+else:
+    text = st.text_area("Paste your text here:", height=200)
+
+    # Word and Character Count
     if text.strip():
         st.write(f"Word Count: {len(text.split())}")
         st.write(f"Character Count: {len(text)}")
 
-        max_length = st.slider("Max summary length (words):", 50, 500, 200)
-        min_length = st.slider("Min summary length (words):", 10, 100, 50)
+    max_length = st.slider("Max summary length (words):", 50, 500, 200)
+    min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
+    if max_length <= min_length:
+        st.error("Max length must be greater than Min length.")
+    elif not text.strip():
+        st.warning("Please provide some text to summarize.")
+    else:
+        # Generate Summary
         if st.button("Summarize"):
-            summary = summarize_text(text, max_length, min_length)
-            st.subheader("Summary:")
-            st.write(summary)
+            try:
+                summary = summarize_text(text, max_length, min_length)
+                st.subheader("Summary:")
+                st.write(summary)
 
-            sentiment = sentiment_analyzer(summary)[0]
-            st.write(f"Sentiment: {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
+                # Extract Keywords
+                st.subheader("Extracted Keywords:")
+                keywords = extract_keywords(summary)
+                st.write(", ".join(keywords))
 
-            keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-            st.write("Keywords:", ", ".join([word for word, _ in keywords]))
+                # Generate Word Cloud
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+                fig, ax = plt.subplots()
+                ax.imshow(wordcloud, interpolation="bilinear")
+                ax.axis("off")
+                st.pyplot(fig)
 
-            pdf_data = create_pdf(summary)
-            st.download_button("Download PDF", pdf_data, "summary.pdf", "application/pdf")
+                # Download Options
+                st.subheader("Download Files:")
+                col1, col2, col3 = st.columns(3)
 
-            txt_data = create_txt(summary)
-            st.download_button("Download TXT", txt_data, "summary.txt", "text/plain")
+                # PDF Download Button
+                with col1:
+                    pdf_data = create_pdf(summary)
+                    st.download_button(
+                        label="Download PDF",
+                        data=pdf_data,
+                        file_name="summary.pdf",
+                        mime="application/pdf",
+                    )
 
-            docx_data = create_docx(summary)
-            st.download_button("Download DOCX", docx_data, "summary.docx",
-                               "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                # DOCX Download Button
+                with col2:
+                    docx_data = create_docx(summary)
+                    st.download_button(
+                        label="Download DOCX",
+                        data=docx_data,
+                        file_name="summary.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
 
-            audio_data = text_to_speech(summary)
-            st.audio(audio_data, format="audio/mp3")
-            st.download_button("Download Audio", audio_data, "summary.mp3", "audio/mpeg")
+                # TXT Download Button
+                with col3:
+                    txt_data = create_txt(summary)
+                    st.download_button(
+                        label="Download TXT",
+                        data=txt_data,
+                        file_name="summary.txt",
+                        mime="text/plain",
+                    )
 
-            wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-            fig, ax = plt.subplots()
-            ax.imshow(wordcloud, interpolation="bilinear")
-            ax.axis("off")
-            st.pyplot(fig)
-
-# Multiple File Summarization
-elif option == "Multiple Files":
-    uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
-    if uploaded_files:
-        zip_buffer = BytesIO()
-        with ZipFile(zip_buffer, "w") as zip_file:
-            for file in uploaded_files:
-                text = file.read().decode("utf-8")
-                summary = summarize_text(text, 200, 50)
-                zip_file.writestr(f"{file.name}_summary.txt", summary)
-        zip_buffer.seek(0)
-        st.download_button("Download All Summaries as ZIP", zip_buffer, "summaries.zip", "application/zip")
-
-# URL Summarization
-elif option == "URL":
-    url = st.text_input("Enter URL:")
-    if st.button("Extract and Summarize"):
-        text = extract_text_from_url(url)
-        summary = summarize_text(text, 200, 50)
-        st.subheader("Summary:")
-        st.write(summary)
-
-# Compare Texts
-elif option == "Compare Texts":
-    text1 = st.text_area("Text 1:", height=200)
-    text2 = st.text_area("Text 2:", height=200)
-    if st.button("Compare Summaries"):
-        summary1 = summarize_text(text1, 200, 50)
-        summary2 = summarize_text(text2, 200, 50)
-        st.write("Summary 1:")
-        st.write(summary1)
-        st.write("Summary 2:")
-        st.write(summary2)
-        st.write("Are the summaries identical?", "Yes" if summary1 == summary2 else "No")
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")

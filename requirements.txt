@@ -1,11 +1,9 @@
 streamlit
-transformers
 torch
+transformers
 reportlab
 wordcloud
 matplotlib
 python-docx
-keybert
 gtts
-scikit-learn
-numpy
+keybert

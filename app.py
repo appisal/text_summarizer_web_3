@@ -73,6 +73,14 @@ def create_docx(summary):
     buffer.seek(0)
     return buffer
 
+# Function to convert summary to audio
+def create_audio(summary):
+    tts = gTTS(summary)
+    buffer = BytesIO()
+    tts.write_to_fp(buffer)
+    buffer.seek(0)
+    return buffer
+
 # Streamlit App
 st.title("Text Summarizer")
 
@@ -108,6 +116,33 @@ if uploaded_file:
                 keywords = extract_keywords(summary)
                 st.write(", ".join(keywords))
 
+                # Download PDF Button
+                pdf_data = create_pdf(summary)
+                st.download_button(
+                    label="Download Summary as PDF",
+                    data=pdf_data,
+                    file_name="summary.pdf",
+                    mime="application/pdf",
+                )
+
+                # Download TXT Button
+                txt_data = create_txt(summary)
+                st.download_button(
+                    label="Download Summary as TXT",
+                    data=txt_data,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
+
+                # Download DOCX Button
+                docx_data = create_docx(summary)
+                st.download_button(
+                    label="Download Summary as DOCX",
+                    data=docx_data,
+                    file_name="summary.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+
                 # Generate Word Cloud
                 wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
                 fig, ax = plt.subplots()
@@ -115,39 +150,9 @@ if uploaded_file:
                 ax.axis("off")
                 st.pyplot(fig)
 
-                # Download Options
-                st.subheader("Download Files:")
-                col1, col2, col3 = st.columns(3)
-
-                # PDF Download Button
-                with col1:
-                    pdf_data = create_pdf(summary)
-                    st.download_button(
-                        label="Download PDF",
-                        data=pdf_data,
-                        file_name="summary.pdf",
-                        mime="application/pdf",
-                    )
-
-                # DOCX Download Button
-                with col2:
-                    docx_data = create_docx(summary)
-                    st.download_button(
-                        label="Download DOCX",
-                        data=docx_data,
-                        file_name="summary.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    )
-
-                # TXT Download Button
-                with col3:
-                    txt_data = create_txt(summary)
-                    st.download_button(
-                        label="Download TXT",
-                        data=txt_data,
-                        file_name="summary.txt",
-                        mime="text/plain",
-                    )
+                # Audio Output
+                audio_data = create_audio(summary)
+                st.audio(audio_data, format="audio/mp3", start_time=0)
 
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
@@ -181,6 +186,33 @@ else:
                 keywords = extract_keywords(summary)
                 st.write(", ".join(keywords))
 
+                # Download PDF Button
+                pdf_data = create_pdf(summary)
+                st.download_button(
+                    label="Download Summary as PDF",
+                    data=pdf_data,
+                    file_name="summary.pdf",
+                    mime="application/pdf",
+                )
+
+                # Download TXT Button
+                txt_data = create_txt(summary)
+                st.download_button(
+                    label="Download Summary as TXT",
+                    data=txt_data,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
+
+                # Download DOCX Button
+                docx_data = create_docx(summary)
+                st.download_button(
+                    label="Download Summary as DOCX",
+                    data=docx_data,
+                    file_name="summary.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+
                 # Generate Word Cloud
                 wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
                 fig, ax = plt.subplots()
@@ -188,39 +220,9 @@ else:
                 ax.axis("off")
                 st.pyplot(fig)
 
-                # Download Options
-                st.subheader("Download Files:")
-                col1, col2, col3 = st.columns(3)
-
-                # PDF Download Button
-                with col1:
-                    pdf_data = create_pdf(summary)
-                    st.download_button(
-                        label="Download PDF",
-                        data=pdf_data,
-                        file_name="summary.pdf",
-                        mime="application/pdf",
-                    )
-
-                # DOCX Download Button
-                with col2:
-                    docx_data = create_docx(summary)
-                    st.download_button(
-                        label="Download DOCX",
-                        data=docx_data,
-                        file_name="summary.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    )
-
-                # TXT Download Button
-                with col3:
-                    txt_data = create_txt(summary)
-                    st.download_button(
-                        label="Download TXT",
-                        data=txt_data,
-                        file_name="summary.txt",
-                        mime="text/plain",
-                    )
+                # Audio Output
+                audio_data = create_audio(summary)
+                st.audio(audio_data, format="audio/mp3", start_time=0)
 
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")

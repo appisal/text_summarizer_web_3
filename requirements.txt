@@ -4,4 +4,4 @@ torch==2.0.1
 reportlab==3.6.14
 python-docx==0.8.11
 pandas==2.1.1
-googletrans==4.0.0-rc1
+googletrans==4.0.0rc1

@@ -1,5 +1,5 @@
-streamlit==1.24.0
-transformers==4.33.2
-torch==2.0.1+cpu
+streamlit==1.26.0
+torch==2.0.1
+transformers==4.34.0
 reportlab==3.6.14
 python-docx==0.8.11

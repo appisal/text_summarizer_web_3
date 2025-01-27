@@ -4,9 +4,9 @@ import torch
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 from docx import Document
+import pandas as pd
+from collections import Counter
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
@@ -59,10 +59,45 @@ def create_docx(summary):
     buffer.seek(0)
     return buffer
 
-# Streamlit App
-st.title("Text Summarizer")
+# Function to create a CSV file
+def create_csv(summary):
+    buffer = BytesIO()
+    df = pd.DataFrame({"Summary": [summary]})
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+    return buffer
 
+# Function to get advanced text statistics
+def get_text_statistics(text):
+    word_count = len(text.split())
+    unique_words = len(set(text.split()))
+    most_common_words = Counter(text.split()).most_common(5)
+    return {
+        "Word Count": word_count,
+        "Unique Words": unique_words,
+        "Most Common Words": most_common_words,
+    }
+
+# Streamlit App
+st.set_page_config(page_title="Text Summarizer", page_icon="📄", layout="wide")
+
+st.title("Text Summarizer")
 st.write("Upload a text file or paste text below to summarize it.")
+
+# Add Dark/Light Theme Toggle
+theme = st.radio("Select Theme:", ["Light", "Dark"])
+if theme == "Dark":
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # File Upload Section
 uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
@@ -71,9 +106,14 @@ if uploaded_file:
     st.write("Uploaded Text:")
     st.text_area("Original Text", value=text, height=200)
 
-    # Word and Character Count
-    st.write(f"Word Count: {len(text.split())}")
-    st.write(f"Character Count: {len(text)}")
+    # Text Statistics
+    stats = get_text_statistics(text)
+    st.write("Advanced Text Statistics:")
+    st.write(f"Word Count: {stats['Word Count']}")
+    st.write(f"Unique Words: {stats['Unique Words']}")
+    st.write("Most Common Words:")
+    for word, count in stats["Most Common Words"]:
+        st.write(f"{word}: {count} times")
 
     # Summary Length Sliders
     max_length = st.slider("Max summary length (words):", 50, 500, 200)
@@ -88,6 +128,15 @@ if uploaded_file:
                 summary = summarize_text(text, max_length, min_length)
                 st.subheader("Summary:")
                 st.write(summary)
+
+                # Language Translation
+                lang = st.selectbox("Translate Summary to:", ["None", "Spanish", "French", "German", "Chinese"])
+                if lang != "None":
+                    from googletrans import Translator
+                    translator = Translator()
+                    translated_summary = translator.translate(summary, dest=lang[:2].lower()).text
+                    st.write(f"Translated Summary ({lang}):")
+                    st.write(translated_summary)
 
                 # Download PDF Button
                 pdf_data = create_pdf(summary)
@@ -116,12 +165,14 @@ if uploaded_file:
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 )
 
-                # Generate Word Cloud
-                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-                fig, ax = plt.subplots()
-                ax.imshow(wordcloud, interpolation="bilinear")
-                ax.axis("off")
-                st.pyplot(fig)
+                # Download CSV Button
+                csv_data = create_csv(summary)
+                st.download_button(
+                    label="Download Summary as CSV",
+                    data=csv_data,
+                    file_name="summary.csv",
+                    mime="text/csv",
+                )
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
 
@@ -148,39 +199,5 @@ else:
                 summary = summarize_text(text, max_length, min_length)
                 st.subheader("Summary:")
                 st.write(summary)
-
-                # Download PDF Button
-                pdf_data = create_pdf(summary)
-                st.download_button(
-                    label="Download Summary as PDF",
-                    data=pdf_data,
-                    file_name="summary.pdf",
-                    mime="application/pdf",
-                )
-
-                # Download TXT Button
-                txt_data = create_txt(summary)
-                st.download_button(
-                    label="Download Summary as TXT",
-                    data=txt_data,
-                    file_name="summary.txt",
-                    mime="text/plain",
-                )
-
-                # Download DOCX Button
-                docx_data = create_docx(summary)
-                st.download_button(
-                    label="Download Summary as DOCX",
-                    data=docx_data,
-                    file_name="summary.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                )
-
-                # Generate Word Cloud
-                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-                fig, ax = plt.subplots()
-                ax.imshow(wordcloud, interpolation="bilinear")
-                ax.axis("off")
-                st.pyplot(fig)
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")

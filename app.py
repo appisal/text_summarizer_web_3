@@ -20,16 +20,13 @@ summarizer = load_summarizer()
 def summarize_text(text, max_length, min_length):
     if len(text.split()) < min_length:
         return "Input text is too short to summarize."
-    try:
-        summary = summarizer(
-            text,
-            max_length=max_length,
-            min_length=min_length,
-            do_sample=False,
-        )
-        return summary[0]["summary_text"]
-    except Exception as e:
-        return f"Error during summarization: {e}"
+    summary = summarizer(
+        text,
+        max_length=max_length,
+        min_length=min_length,
+        do_sample=False,
+    )
+    return summary[0]["summary_text"]
 
 # Function to create a PDF
 def create_pdf(summary):
@@ -60,8 +57,23 @@ def create_docx(summary):
     buffer.seek(0)
     return buffer
 
+# Additional functionality: Text statistics
+def text_statistics(text):
+    word_count = len(text.split())
+    character_count = len(text)
+    avg_word_length = sum(len(word) for word in text.split()) / word_count if word_count else 0
+    return word_count, character_count, avg_word_length
+
+# Additional functionality: Compare original and summary text
+def compare_lengths(original_text, summary_text):
+    original_words = len(original_text.split())
+    summary_words = len(summary_text.split())
+    reduction_percentage = ((original_words - summary_words) / original_words) * 100 if original_words else 0
+    return original_words, summary_words, reduction_percentage
+
 # Streamlit App
 st.title("Text Summarizer")
+
 st.write("Upload a text file or paste text below to summarize it.")
 
 # File Upload Section
@@ -71,9 +83,11 @@ if uploaded_file:
     st.write("Uploaded Text:")
     st.text_area("Original Text", value=text, height=200)
 
-    # Word and Character Count
-    st.write(f"Word Count: {len(text.split())}")
-    st.write(f"Character Count: {len(text)}")
+    # Text Statistics
+    word_count, character_count, avg_word_length = text_statistics(text)
+    st.write(f"Word Count: {word_count}")
+    st.write(f"Character Count: {character_count}")
+    st.write(f"Average Word Length: {avg_word_length:.2f} characters")
 
     # Summary Length Sliders
     max_length = st.slider("Max summary length (words):", 50, 500, 200)
@@ -84,45 +98,56 @@ if uploaded_file:
     else:
         # Generate Summary
         if st.button("Summarize"):
-            summary = summarize_text(text, max_length, min_length)
-            st.subheader("Summary:")
-            st.write(summary)
+            try:
+                summary = summarize_text(text, max_length, min_length)
+                st.subheader("Summary:")
+                st.write(summary)
 
-            # Download PDF Button
-            pdf_data = create_pdf(summary)
-            st.download_button(
-                label="Download Summary as PDF",
-                data=pdf_data,
-                file_name="summary.pdf",
-                mime="application/pdf",
-            )
+                # Compare Original and Summary Text
+                original_words, summary_words, reduction_percentage = compare_lengths(text, summary)
+                st.write(f"Original Word Count: {original_words}")
+                st.write(f"Summary Word Count: {summary_words}")
+                st.write(f"Reduction Percentage: {reduction_percentage:.2f}%")
 
-            # Download TXT Button
-            txt_data = create_txt(summary)
-            st.download_button(
-                label="Download Summary as TXT",
-                data=txt_data,
-                file_name="summary.txt",
-                mime="text/plain",
-            )
+                # Download PDF Button
+                pdf_data = create_pdf(summary)
+                st.download_button(
+                    label="Download Summary as PDF",
+                    data=pdf_data,
+                    file_name="summary.pdf",
+                    mime="application/pdf",
+                )
 
-            # Download DOCX Button
-            docx_data = create_docx(summary)
-            st.download_button(
-                label="Download Summary as DOCX",
-                data=docx_data,
-                file_name="summary.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            )
+                # Download TXT Button
+                txt_data = create_txt(summary)
+                st.download_button(
+                    label="Download Summary as TXT",
+                    data=txt_data,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
+
+                # Download DOCX Button
+                docx_data = create_docx(summary)
+                st.download_button(
+                    label="Download Summary as DOCX",
+                    data=docx_data,
+                    file_name="summary.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
 
 # Text Input Section
 else:
     text = st.text_area("Paste your text here:", height=200)
 
-    # Word and Character Count
+    # Text Statistics
     if text.strip():
-        st.write(f"Word Count: {len(text.split())}")
-        st.write(f"Character Count: {len(text)}")
+        word_count, character_count, avg_word_length = text_statistics(text)
+        st.write(f"Word Count: {word_count}")
+        st.write(f"Character Count: {character_count}")
+        st.write(f"Average Word Length: {avg_word_length:.2f} characters")
 
     max_length = st.slider("Max summary length (words):", 50, 500, 200)
     min_length = st.slider("Min summary length (words):", 10, 100, 50)
@@ -134,33 +159,42 @@ else:
     else:
         # Generate Summary
         if st.button("Summarize"):
-            summary = summarize_text(text, max_length, min_length)
-            st.subheader("Summary:")
-            st.write(summary)
+            try:
+                summary = summarize_text(text, max_length, min_length)
+                st.subheader("Summary:")
+                st.write(summary)
 
-            # Download PDF Button
-            pdf_data = create_pdf(summary)
-            st.download_button(
-                label="Download Summary as PDF",
-                data=pdf_data,
-                file_name="summary.pdf",
-                mime="application/pdf",
-            )
+                # Compare Original and Summary Text
+                original_words, summary_words, reduction_percentage = compare_lengths(text, summary)
+                st.write(f"Original Word Count: {original_words}")
+                st.write(f"Summary Word Count: {summary_words}")
+                st.write(f"Reduction Percentage: {reduction_percentage:.2f}%")
 
-            # Download TXT Button
-            txt_data = create_txt(summary)
-            st.download_button(
-                label="Download Summary as TXT",
-                data=txt_data,
-                file_name="summary.txt",
-                mime="text/plain",
-            )
+                # Download PDF Button
+                pdf_data = create_pdf(summary)
+                st.download_button(
+                    label="Download Summary as PDF",
+                    data=pdf_data,
+                    file_name="summary.pdf",
+                    mime="application/pdf",
+                )
 
-            # Download DOCX Button
-            docx_data = create_docx(summary)
-            st.download_button(
-                label="Download Summary as DOCX",
-                data=docx_data,
-                file_name="summary.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            )
+                # Download TXT Button
+                txt_data = create_txt(summary)
+                st.download_button(
+                    label="Download Summary as TXT",
+                    data=txt_data,
+                    file_name="summary.txt",
+                    mime="text/plain",
+                )
+
+                # Download DOCX Button
+                docx_data = create_docx(summary)
+                st.download_button(
+                    label="Download Summary as DOCX",
+                    data=docx_data,
+                    file_name="summary.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")

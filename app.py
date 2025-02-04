@@ -4,7 +4,7 @@ import torch
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from docx import Document
+from docx import Document  # Ensure this is correct
 from gtts import gTTS
 from keybert import KeyBERT
 from bs4 import BeautifulSoup

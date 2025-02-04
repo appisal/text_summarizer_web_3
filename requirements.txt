@@ -2,10 +2,11 @@ streamlit
 torch
 transformers
 reportlab
-wordcloud
 matplotlib
-python-docx
+docx
 gtts
 keybert
 beautifulsoup4
 requests
+spacy
+textstat

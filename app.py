@@ -111,7 +111,7 @@ def text_to_speech(summary):
     return buffer
 
 # Streamlit App
-st.title("Text Summarizer - Enhanced")
+st.title(" Ap Text Summarizer ")
 
 # User Authentication
 if "authenticated" not in st.session_state:

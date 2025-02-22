@@ -9,5 +9,3 @@ gtts
 keybert
 beautifulsoup4
 requests
-zipfile36  # For handling ZIP files
-sqlite3  # Included in Python by default, but listed for clarity

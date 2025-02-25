@@ -1,6 +1,4 @@
 import streamlit as st
-import sqlite3
-import hashlib
 from transformers import pipeline
 import torch
 from io import BytesIO
@@ -17,36 +15,6 @@ from zipfile import ZipFile
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
-
-# Database setup
-def create_user_table():
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS users (username TEXT, password TEXT)")
-    conn.commit()
-    conn.close()
-
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
-def add_user(username, password):
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO users VALUES (?, ?)", (username, hash_password(password)))
-    conn.commit()
-    conn.close()
-
-def check_login(username, password):
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT password FROM users WHERE username=?", (username,))
-    stored_password = cursor.fetchone()
-    conn.close()
-    return stored_password and stored_password[0] == hash_password(password)
-
-# Run only once to create the table (uncomment to add test users)
-create_user_table()
-# add_user("admin", "password123")  # Example user (run once, then comment it out)
 
 # Load summarizer and sentiment analysis pipelines
 @st.cache_resource
@@ -65,7 +33,12 @@ keyword_extractor = KeyBERT()
 def summarize_text(text, max_length, min_length):
     if len(text.split()) < min_length:
         return "Input text is too short to summarize."
-    summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)
+    summary = summarizer(
+        text,
+        max_length=max_length,
+        min_length=min_length,
+        do_sample=False,
+    )
     return summary[0]["summary_text"]
 
 # Function to extract text from URL
@@ -111,96 +84,103 @@ def text_to_speech(summary):
     return buffer
 
 # Streamlit App
-st.title(" Ap Text Summarizer ")
+st.title("Text Summarizer - Enhanced")
 
-# User Authentication
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
+st.sidebar.title("Features")
 
-if not st.session_state["authenticated"]:
-    st.sidebar.subheader("Login")
-    username = st.sidebar.text_input("Username")
-    password = st.sidebar.text_input("Password", type="password")
-    if st.sidebar.button("Login"):
-        if check_login(username, password):
-            st.session_state["authenticated"] = True
-            st.sidebar.success("Login successful!")
-            st.rerun()
+# Ensure username is stored in session state
+if "username" not in st.session_state:
+    st.session_state["username"] = None  # Initialize it
 
-        else:
-            st.sidebar.error("Invalid username or password.")
-
-    st.sidebar.subheader("Register")
-    new_username = st.sidebar.text_input("New Username")
-    new_password = st.sidebar.text_input("New Password", type="password")
-    if st.sidebar.button("Register"):
-        add_user(new_username, new_password)
-        st.sidebar.success("User registered successfully! Please log in.")
-
+if st.session_state["username"]:
+    st.sidebar.success(f"Logged in as {st.session_state['username']}")
 else:
-    st.sidebar.success(f"Logged in as {username}")
-    if st.sidebar.button("Logout"):
-        st.session_state["authenticated"] = False
-        st.experimental_rerun()
+    st.sidebar.error("User not logged in")
 
-    st.sidebar.title("Features")
-    option = st.sidebar.radio("Choose an option:", ["Single File", "Multiple Files", "URL", "Compare Texts"])
+option = st.sidebar.radio(
+    "Choose an option:",
+    ["Single File", "Multiple Files", "URL", "Compare Texts"]
+)
 
-    # Single File Summarization
-    if option == "Single File":
-        st.write("Upload a text file or paste text below to summarize it.")
+# Single File Summarization
+if option == "Single File":
+    st.write("Upload a text file or paste text below to summarize it.")
 
-        uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
-        text = uploaded_file.read().decode("utf-8") if uploaded_file else st.text_area("Paste your text here:", height=200)
+    uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
+    if uploaded_file:
+        text = uploaded_file.read().decode("utf-8")
+    else:
+        text = st.text_area("Paste your text here:", height=200)
 
-        if text.strip():
-            st.write(f"Word Count: {len(text.split())}")
-            st.write(f"Character Count: {len(text)}")
+    if text.strip():
+        st.write(f"Word Count: {len(text.split())}")
+        st.write(f"Character Count: {len(text)}")
 
-            max_length = st.slider("Max summary length (words):", 50, 500, 200)
-            min_length = st.slider("Min summary length (words):", 10, 100, 50)
+        max_length = st.slider("Max summary length (words):", 50, 500, 200)
+        min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
-            if st.button("Summarize"):
-                summary = summarize_text(text, max_length, min_length)
-                st.subheader("Summary:")
-                st.write(summary)
+        if st.button("Summarize"):
+            summary = summarize_text(text, max_length, min_length)
+            st.subheader("Summary:")
+            st.write(summary)
 
-                sentiment = sentiment_analyzer(summary)[0]
-                st.write(f"Sentiment: {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
+            sentiment = sentiment_analyzer(summary)[0]
+            st.write(f"Sentiment: {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
 
-                keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-                st.write("Keywords:", ", ".join([word for word, _ in keywords]))
+            keywords = keyword_extractor.extract_keywords(summary, top_n=5)
+            st.write("Keywords:", ", ".join([word for word, _ in keywords]))
 
-                pdf_data = create_pdf(summary)
-                st.download_button("Download PDF", pdf_data, "summary.pdf", "application/pdf")
+            pdf_data = create_pdf(summary)
+            st.download_button("Download PDF", pdf_data, "summary.pdf", "application/pdf")
 
-                txt_data = create_txt(summary)
-                st.download_button("Download TXT", txt_data, "summary.txt", "text/plain")
+            txt_data = create_txt(summary)
+            st.download_button("Download TXT", txt_data, "summary.txt", "text/plain")
 
-                docx_data = create_docx(summary)
-                st.download_button("Download DOCX", docx_data, "summary.docx",
-                                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            docx_data = create_docx(summary)
+            st.download_button("Download DOCX", docx_data, "summary.docx",
+                               "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
-                audio_data = text_to_speech(summary)
-                st.audio(audio_data, format="audio/mp3")
-                st.download_button("Download Audio", audio_data, "summary.mp3", "audio/mpeg")
+            audio_data = text_to_speech(summary)
+            st.audio(audio_data, format="audio/mp3")
+            st.download_button("Download Audio", audio_data, "summary.mp3", "audio/mpeg")
 
-                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-                fig, ax = plt.subplots()
-                ax.imshow(wordcloud, interpolation="bilinear")
-                ax.axis("off")
-                st.pyplot(fig)
+            wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+            fig, ax = plt.subplots()
+            ax.imshow(wordcloud, interpolation="bilinear")
+            ax.axis("off")
+            st.pyplot(fig)
 
-    # Multiple File Summarization
-    elif option == "Multiple Files":
-        uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
-        if uploaded_files:
-            zip_buffer = BytesIO()
-            with ZipFile(zip_buffer, "w") as zip_file:
-                for file in uploaded_files:
-                    text = file.read().decode("utf-8")
-                    summary = summarize_text(text, 200, 50)
-                    zip_file.writestr(f"{file.name}_summary.txt", summary)
-            zip_buffer.seek(0)
-            st.download_button("Download All Summaries as ZIP", zip_buffer, "summaries.zip", "application/zip")
+# Multiple File Summarization
+elif option == "Multiple Files":
+    uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
+    if uploaded_files:
+        zip_buffer = BytesIO()
+        with ZipFile(zip_buffer, "w") as zip_file:
+            for file in uploaded_files:
+                text = file.read().decode("utf-8")
+                summary = summarize_text(text, 200, 50)
+                zip_file.writestr(f"{file.name}_summary.txt", summary)
+        zip_buffer.seek(0)
+        st.download_button("Download All Summaries as ZIP", zip_buffer, "summaries.zip", "application/zip")
 
+# URL Summarization
+elif option == "URL":
+    url = st.text_input("Enter URL:")
+    if st.button("Extract and Summarize"):
+        text = extract_text_from_url(url)
+        summary = summarize_text(text, 200, 50)
+        st.subheader("Summary:")
+        st.write(summary)
+
+# Compare Texts
+elif option == "Compare Texts":
+    text1 = st.text_area("Text 1:", height=200)
+    text2 = st.text_area("Text 2:", height=200)
+    if st.button("Compare Summaries"):
+        summary1 = summarize_text(text1, 200, 50)
+        summary2 = summarize_text(text2, 200, 50)
+        st.write("Summary 1:")
+        st.write(summary1)
+        st.write("Summary 2:")
+        st.write(summary2)
+        st.write("Are the summaries identical?", "Yes" if summary1 == summary2 else "No")

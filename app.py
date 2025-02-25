@@ -125,7 +125,8 @@ if not st.session_state["authenticated"]:
         if check_login(username, password):
             st.session_state["authenticated"] = True
             st.sidebar.success("Login successful!")
-            st.experimental_rerun()
+            st.rerun()
+
         else:
             st.sidebar.error("Invalid username or password.")
 

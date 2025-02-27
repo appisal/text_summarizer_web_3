@@ -43,10 +43,14 @@ def summarize_text(text, max_length, min_length):
 
 # Function to extract text from URL
 def extract_text_from_url(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    paragraphs = soup.find_all("p")
-    return " ".join([p.text for p in paragraphs])
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses
+        soup = BeautifulSoup(response.content, "html.parser")
+        paragraphs = soup.find_all("p")
+        return " ".join([p.text for p in paragraphs])
+    except Exception as e:
+        return f"Error extracting text from URL: {e}"
 
 # Function to create files (PDF, TXT, DOCX)
 def create_pdf(summary):
@@ -95,7 +99,7 @@ if "username" not in st.session_state:
 if st.session_state["username"]:
     st.sidebar.success(f"Logged in as {st.session_state['username']}")
 else:
-    st.sidebar.error("User not logged in")
+    st.sidebar.error("User  not logged in")
 
 option = st.sidebar.radio(
     "Choose an option:",
@@ -168,9 +172,12 @@ elif option == "URL":
     url = st.text_input("Enter URL:")
     if st.button("Extract and Summarize"):
         text = extract_text_from_url(url)
-        summary = summarize_text(text, 200, 50)
-        st.subheader("Summary:")
-        st.write(summary)
+        if "Error" in text:
+            st.error(text)
+        else:
+            summary = summarize_text(text, 200, 50)
+            st.subheader("Summary:")
+            st.write(summary)
 
 # Compare Texts
 elif option == "Compare Texts":

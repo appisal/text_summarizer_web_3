@@ -13,6 +13,47 @@ from bs4 import BeautifulSoup
 import requests
 from zipfile import ZipFile
 
+# Custom CSS for professional styling
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #f5f5f5;
+        font-family: 'Helvetica Neue', sans-serif;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .stButton>button:hover {
+        background-color: #45a049;
+    }
+    .stTextArea>textarea {
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+    .stSlider>div {
+        color: #4CAF50;
+    }
+    .stHeader {
+        color: #4CAF50;
+    }
+    .stDownloadButton>button {
+        background-color: #008CBA;
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .stDownloadButton>button:hover {
+        background-color: #007B9E;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
 
@@ -88,7 +129,7 @@ def text_to_speech(summary):
     return buffer
 
 # Streamlit App
-st.set_page_config(page_title="Text Summarizer", layout="wide")
+st.set_page_config(page_title="Text Summarizer", layout="wide", page_icon="📝")
 st.title("📝 Text Summarizer - Enhanced")
 
 st.sidebar.title("Features")
@@ -117,64 +158,71 @@ if option == "Single File":
             min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
             if st.button("Summarize"):
-                summary = summarize_text(text, max_length, min_length)
-                st.subheader("Summary:")
-                st.write(summary)
+                with st.spinner("Generating summary..."):
+                    summary = summarize_text(text, max_length, min_length)
+                    st.subheader("Summary:")
+                    st.write(summary)
 
-                sentiment = sentiment_analyzer(summary)[0]
-                st.write(f"**Sentiment:** {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
+                    sentiment = sentiment_analyzer(summary)[0]
+                    st.write(f"**Sentiment:** {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
 
-                keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-                st.write("**Keywords:**", ", ".join([word for word, _ in keywords]))
+                    keywords = keyword_extractor.extract_keywords(summary, top_n=5)
+                    st.write("**Keywords:**", ", ".join([word for word, _ in keywords]))
 
-                # File download buttons
-                pdf_data = create_pdf(summary)
-                st.download_button("Download PDF", pdf_data, "summary.pdf", "application/pdf")
+                    # File download buttons
+                    st.markdown("### Download Options:")
+                    col3, col4, col5, col6 = st.columns(4)
+                    with col3:
+                        pdf_data = create_pdf(summary)
+                        st.download_button("📄 Download PDF", pdf_data, "summary.pdf", "application/pdf")
+                    with col4:
+                        txt_data = create_txt(summary)
+                        st.download_button("📝 Download TXT", txt_data, "summary.txt", "text/plain")
+                    with col5:
+                        docx_data = create_docx(summary)
+                        st.download_button("📑 Download DOCX", docx_data, "summary.docx",
+                                           "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                    with col6:
+                        audio_data = text_to_speech(summary)
+                        st.audio(audio_data, format="audio/mp3")
+                        st.download_button("🎧 Download Audio", audio_data, "summary.mp3", "audio/mpeg")
 
-                txt_data = create_txt(summary)
-                st.download_button("Download TXT", txt_data, "summary.txt", "text/plain")
-
-                docx_data = create_docx(summary)
-                st.download_button("Download DOCX", docx_data, "summary.docx",
-                                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-
-                audio_data = text_to_speech(summary)
-                st.audio(audio_data, format="audio/mp3")
-                st.download_button("Download Audio", audio_data, "summary.mp3", "audio/mpeg")
-
-                # Word cloud visualization
-                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-                fig, ax = plt.subplots()
-                ax.imshow(wordcloud, interpolation="bilinear")
-                ax.axis("off")
-                st.pyplot(fig)
+                    # Word cloud visualization
+                    st.markdown("### Word Cloud:")
+                    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+                    fig, ax = plt.subplots()
+                    ax.imshow(wordcloud, interpolation="bilinear")
+                    ax.axis("off")
+                    st.pyplot(fig)
 
 # Multiple File Summarization
 elif option == "Multiple Files":
     st.write("Upload multiple text files to summarize them.")
     uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
     if uploaded_files:
-        zip_buffer = BytesIO()
-        with ZipFile(zip_buffer, "w") as zip_file:
-            for file in uploaded_files:
-                text = file.read().decode("utf-8")
-                summary = summarize_text(text, 200, 50)
-                zip_file.writestr(f"{file.name}_summary.txt", summary)
-        zip_buffer.seek(0)
-        st.download_button("Download All Summaries as ZIP", zip_buffer, "summaries.zip", "application/zip")
+        with st.spinner("Generating summaries..."):
+            zip_buffer = BytesIO()
+            with ZipFile(zip_buffer, "w") as zip_file:
+                for file in uploaded_files:
+                    text = file.read().decode("utf-8")
+                    summary = summarize_text(text, 200, 50)
+                    zip_file.writestr(f"{file.name}_summary.txt", summary)
+            zip_buffer.seek(0)
+            st.download_button("📦 Download All Summaries as ZIP", zip_buffer, "summaries.zip", "application/zip")
 
 # URL Summarization
 elif option == "URL":
     st.write("Enter a URL to extract and summarize text.")
     url = st.text_input("Enter URL:")
     if st.button("Extract and Summarize"):
-        text = extract_text_from_url(url)
-        if "Error" in text:
-            st.error(text)
-        else:
-            summary = summarize_text(text, 200, 50)
-            st.subheader("Summary:")
-            st.write(summary)
+        with st.spinner("Extracting and summarizing..."):
+            text = extract_text_from_url(url)
+            if "Error" in text:
+                st.error(text)
+            else:
+                summary = summarize_text(text, 200, 50)
+                st.subheader("Summary:")
+                st.write(summary)
 
 # Compare Texts
 elif option == "Compare Texts":
@@ -188,10 +236,11 @@ elif option == "Compare Texts":
         text2 = st.text_area("Text 2:", height=300)
 
     if st.button("Compare Summaries"):
-        summary1 = summarize_text(text1, 200, 50)
-        summary2 = summarize_text(text2, 200, 50)
-        st.write("**Summary 1:**")
-        st.write(summary1)
-        st.write("**Summary 2:**")
-        st.write(summary2)
-        st.write("**Are the summaries identical?**", "Yes" if summary1 == summary2 else "No")
+        with st.spinner("Generating summaries..."):
+            summary1 = summarize_text(text1, 200, 50)
+            summary2 = summarize_text(text2, 200, 50)
+            st.write("**Summary 1:**")
+            st.write(summary1)
+            st.write("**Summary 2:**")
+            st.write(summary2)
+            st.write("**Are the summaries identical?**", "Yes" if summary1 == summary2 else "No")

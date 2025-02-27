@@ -88,74 +88,70 @@ def text_to_speech(summary):
     return buffer
 
 # Streamlit App
-st.title("Text Summarizer - Enhanced")
+st.set_page_config(page_title="Text Summarizer", layout="wide")
+st.title("📝 Text Summarizer - Enhanced")
 
 st.sidebar.title("Features")
-
-# Ensure username is stored in session state
-if "username" not in st.session_state:
-    st.session_state["username"] = None  # Initialize it
-
-if st.session_state["username"]:
-    st.sidebar.success(f"Logged in as {st.session_state['username']}")
-else:
-    st.sidebar.error("User  not logged in")
-
-option = st.sidebar.radio(
-    "Choose an option:",
-    ["Single File", "Multiple Files", "URL", "Compare Texts"]
-)
+st.sidebar.markdown("### Choose an option:")
+option = st.sidebar.radio("", ["Single File", "Multiple Files", "URL", "Compare Texts"])
 
 # Single File Summarization
 if option == "Single File":
     st.write("Upload a text file or paste text below to summarize it.")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
+        if uploaded_file:
+            text = uploaded_file.read().decode("utf-8")
+        else:
+            text = st.text_area("Paste your text here:", height=300)
 
-    uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
-    if uploaded_file:
-        text = uploaded_file.read().decode("utf-8")
-    else:
-        text = st.text_area("Paste your text here:", height=200)
+    with col2:
+        if text.strip():
+            st.write(f"**Word Count:** {len(text.split())}")
+            st.write(f"**Character Count:** {len(text)}")
 
-    if text.strip():
-        st.write(f"Word Count: {len(text.split())}")
-        st.write(f"Character Count: {len(text)}")
+            max_length = st.slider("Max summary length (words):", 50, 500, 200)
+            min_length = st.slider("Min summary length (words):", 10, 100, 50)
 
-        max_length = st.slider("Max summary length (words):", 50, 500, 200)
-        min_length = st.slider("Min summary length (words):", 10, 100, 50)
+            if st.button("Summarize"):
+                summary = summarize_text(text, max_length, min_length)
+                st.subheader("Summary:")
+                st.write(summary)
 
-        if st.button("Summarize"):
-            summary = summarize_text(text, max_length, min_length)
-            st.subheader("Summary:")
-            st.write(summary)
+                sentiment = sentiment_analyzer(summary)[0]
+                st.write(f"**Sentiment:** {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
 
-            sentiment = sentiment_analyzer(summary)[0]
-            st.write(f"Sentiment: {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
+                keywords = keyword_extractor.extract_keywords(summary, top_n=5)
+                st.write("**Keywords:**", ", ".join([word for word, _ in keywords]))
 
-            keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-            st.write("Keywords:", ", ".join([word for word, _ in keywords]))
+                # File download buttons
+                pdf_data = create_pdf(summary)
+                st.download_button("Download PDF", pdf_data, "summary.pdf", "application/pdf")
 
-            pdf_data = create_pdf(summary)
-            st.download_button("Download PDF", pdf_data, "summary.pdf", "application/pdf")
+                txt_data = create_txt(summary)
+                st.download_button("Download TXT", txt_data, "summary.txt", "text/plain")
 
-            txt_data = create_txt(summary)
-            st.download_button("Download TXT", txt_data, "summary.txt", "text/plain")
+                docx_data = create_docx(summary)
+                st.download_button("Download DOCX", docx_data, "summary.docx",
+                                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
-            docx_data = create_docx(summary)
-            st.download_button("Download DOCX", docx_data, "summary.docx",
-                               "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                audio_data = text_to_speech(summary)
+                st.audio(audio_data, format="audio/mp3")
+                st.download_button("Download Audio", audio_data, "summary.mp3", "audio/mpeg")
 
-            audio_data = text_to_speech(summary)
-            st.audio(audio_data, format="audio/mp3")
-            st.download_button("Download Audio", audio_data, "summary.mp3", "audio/mpeg")
-
-            wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-            fig, ax = plt.subplots()
-            ax.imshow(wordcloud, interpolation="bilinear")
-            ax.axis("off")
-            st.pyplot(fig)
+                # Word cloud visualization
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+                fig, ax = plt.subplots()
+                ax.imshow(wordcloud, interpolation="bilinear")
+                ax.axis("off")
+                st.pyplot(fig)
 
 # Multiple File Summarization
 elif option == "Multiple Files":
+    st.write("Upload multiple text files to summarize them.")
     uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
     if uploaded_files:
         zip_buffer = BytesIO()
@@ -169,6 +165,7 @@ elif option == "Multiple Files":
 
 # URL Summarization
 elif option == "URL":
+    st.write("Enter a URL to extract and summarize text.")
     url = st.text_input("Enter URL:")
     if st.button("Extract and Summarize"):
         text = extract_text_from_url(url)
@@ -181,13 +178,20 @@ elif option == "URL":
 
 # Compare Texts
 elif option == "Compare Texts":
-    text1 = st.text_area("Text 1:", height=200)
-    text2 = st.text_area("Text 2:", height=200)
+    st.write("Enter two texts to compare their summaries.")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        text1 = st.text_area("Text 1:", height=300)
+    
+    with col2:
+        text2 = st.text_area("Text 2:", height=300)
+
     if st.button("Compare Summaries"):
         summary1 = summarize_text(text1, 200, 50)
         summary2 = summarize_text(text2, 200, 50)
-        st.write("Summary 1:")
+        st.write("**Summary 1:**")
         st.write(summary1)
-        st.write("Summary 2:")
+        st.write("**Summary 2:**")
         st.write(summary2)
-        st.write("Are the summaries identical?", "Yes" if summary1 == summary2 else "No")
+        st.write("**Are the summaries identical?**", "Yes" if summary1 == summary2 else "No")

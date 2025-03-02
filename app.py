@@ -12,6 +12,9 @@ from keybert import KeyBERT
 from bs4 import BeautifulSoup
 import requests
 from zipfile import ZipFile
+import os
+import json
+from datetime import datetime
 
 # Custom CSS for professional styling
 st.markdown("""
@@ -51,6 +54,10 @@ st.markdown("""
     .stDownloadButton>button:hover {
         background-color: #007B9E;
     }
+    .dark-mode {
+        background-color: #1e1e1e;
+        color: #ffffff;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -71,7 +78,7 @@ sentiment_analyzer = load_sentiment_analyzer()
 keyword_extractor = KeyBERT()
 
 # Function to summarize text
-def summarize_text(text, max_length, min_length):
+def summarize_text(text, max_length, min_length, language="en"):
     if len(text.split()) < min_length:
         return "Input text is too short to summarize."
     summary = summarizer(
@@ -121,8 +128,8 @@ def create_docx(summary):
     return buffer
 
 # Function to create audio
-def text_to_speech(summary):
-    tts = gTTS(summary, lang="en")
+def text_to_speech(summary, language="en"):
+    tts = gTTS(summary, lang=language)
     buffer = BytesIO()
     tts.write_to_fp(buffer)
     buffer.seek(0)
@@ -132,9 +139,25 @@ def text_to_speech(summary):
 st.set_page_config(page_title="Text Summarizer", layout="wide", page_icon="📝")
 st.title("📝 Text Summarizer - Enhanced")
 
+# Dark Mode Toggle
+dark_mode = st.checkbox("Dark Mode")
+if dark_mode:
+    st.markdown("<style>.stApp {background-color: #1e1e1e; color: #ffffff;}</style>", unsafe_allow_html=True)
+
+# User Authentication
+st.sidebar.title("User Authentication")
+username = st.sidebar.text_input("Username")
+password = st.sidebar.text_input("Password", type="password")
+if st.sidebar.button("Login"):
+    if username == "admin" and password == "password":
+        st.sidebar.success("Logged in as admin")
+    else:
+        st.sidebar.error("Invalid credentials")
+
+# Features
 st.sidebar.title("Features")
 st.sidebar.markdown("### Choose an option:")
-option = st.sidebar.radio("", ["Single File", "Multiple Files", "URL", "Compare Texts"])
+option = st.sidebar.radio("", ["Single File", "Multiple Files", "URL", "Compare Texts", "API Integration"])
 
 # Single File Summarization
 if option == "Single File":
@@ -143,9 +166,14 @@ if option == "Single File":
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
+        uploaded_file = st.file_uploader("Choose a file", type=["txt", "pdf", "docx"])
         if uploaded_file:
-            text = uploaded_file.read().decode("utf-8")
+            if uploaded_file.type == "application/pdf":
+                text = extract_text_from_pdf(uploaded_file)
+            elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                text = extract_text_from_docx(uploaded_file)
+            else:
+                text = uploaded_file.read().decode("utf-8")
         else:
             text = st.text_area("Paste your text here:", height=300)
 
@@ -156,10 +184,11 @@ if option == "Single File":
 
             max_length = st.slider("Max summary length (words):", 50, 500, 200)
             min_length = st.slider("Min summary length (words):", 10, 100, 50)
+            language = st.selectbox("Select Language", ["en", "es", "fr", "de"])
 
             if st.button("Summarize"):
                 with st.spinner("Generating summary..."):
-                    summary = summarize_text(text, max_length, min_length)
+                    summary = summarize_text(text, max_length, min_length, language)
                     st.subheader("Summary:")
                     st.write(summary)
 
@@ -183,7 +212,7 @@ if option == "Single File":
                         st.download_button("📑 Download DOCX", docx_data, "summary.docx",
                                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
                     with col6:
-                        audio_data = text_to_speech(summary)
+                        audio_data = text_to_speech(summary, language)
                         st.audio(audio_data, format="audio/mp3")
                         st.download_button("🎧 Download Audio", audio_data, "summary.mp3", "audio/mpeg")
 
@@ -198,13 +227,18 @@ if option == "Single File":
 # Multiple File Summarization
 elif option == "Multiple Files":
     st.write("Upload multiple text files to summarize them.")
-    uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
+    uploaded_files = st.file_uploader("Choose files", type=["txt", "pdf", "docx"], accept_multiple_files=True)
     if uploaded_files:
         with st.spinner("Generating summaries..."):
             zip_buffer = BytesIO()
             with ZipFile(zip_buffer, "w") as zip_file:
                 for file in uploaded_files:
-                    text = file.read().decode("utf-8")
+                    if file.type == "application/pdf":
+                        text = extract_text_from_pdf(file)
+                    elif file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                        text = extract_text_from_docx(file)
+                    else:
+                        text = file.read().decode("utf-8")
                     summary = summarize_text(text, 200, 50)
                     zip_file.writestr(f"{file.name}_summary.txt", summary)
             zip_buffer.seek(0)
@@ -244,3 +278,20 @@ elif option == "Compare Texts":
             st.write("**Summary 2:**")
             st.write(summary2)
             st.write("**Are the summaries identical?**", "Yes" if summary1 == summary2 else "No")
+
+# API Integration
+elif option == "API Integration":
+    st.write("Fetch data from an API and summarize it.")
+    api_url = st.text_input("Enter API URL:")
+    if st.button("Fetch and Summarize"):
+        with st.spinner("Fetching and summarizing..."):
+            try:
+                response = requests.get(api_url)
+                response.raise_for_status()
+                data = response.json()
+                text = json.dumps(data)
+                summary = summarize_text(text, 200, 50)
+                st.subheader("Summary:")
+                st.write(summary)
+            except Exception as e:
+                st.error(f"Error fetching data from API: {e}")

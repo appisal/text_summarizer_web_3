@@ -1,6 +1,9 @@
 import streamlit as st
 from transformers import pipeline
 import torch
+import time
+import firebase_config  # Import Firebase Module
+import streamlit_authenticator as stauth
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -12,7 +15,6 @@ from keybert import KeyBERT
 from bs4 import BeautifulSoup
 import requests
 from zipfile import ZipFile
-import time
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
@@ -41,7 +43,7 @@ def summarize_text(text, max_length, min_length):
 
     progress_bar = st.progress(0)
     for percent in range(1, 101, 10):
-        time.sleep(0.05)  # Simulate processing delay
+        time.sleep(0.05)
         progress_bar.progress(percent)
 
     summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)
@@ -100,6 +102,25 @@ def text_to_speech(summary):
 # Streamlit App
 st.title("Text Summarizer - Enhanced 🚀")
 
+# Authentication
+users = {"user1@example.com": {"name": "User One", "password": "password123"}}
+
+authenticator = stauth.Authenticate(users, "app_cookie", "random_key", cookie_expiry_days=1)
+
+name, authentication_status, username = authenticator.login("Login", "main")
+
+if authentication_status:
+    st.sidebar.success(f"Welcome, {name}!")
+    if st.button("Logout"):
+        authenticator.logout("Logout", "sidebar")
+
+elif authentication_status is False:
+    st.error("Username/password incorrect")
+
+elif authentication_status is None:
+    st.warning("Please enter your credentials")
+
+# Sidebar
 st.sidebar.title("Features")
 option = st.sidebar.radio(
     "Choose an option:",
@@ -107,7 +128,7 @@ option = st.sidebar.radio(
 )
 
 # Single File Summarization
-if option == "Single File":
+if option == "Single File" and authentication_status:
     st.write("Upload a text file or paste text below to summarize it.")
 
     uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
@@ -134,64 +155,15 @@ if option == "Single File":
             keywords = keyword_extractor.extract_keywords(summary, top_n=5)
             st.write("🔑 Keywords:", ", ".join([word for word, _ in keywords]))
 
-            # Download buttons
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.download_button("📄 Download PDF", create_pdf(summary), "summary.pdf", "application/pdf")
-            with col2:
-                st.download_button("📜 Download TXT", create_txt(summary), "summary.txt", "text/plain")
-            with col3:
-                st.download_button("📖 Download DOCX", create_docx(summary), "summary.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-            with col4:
-                st.download_button("🎵 Download Audio", text_to_speech(summary), "summary.mp3", "audio/mpeg")
+            # Save summary in Firestore
+            firebase_config.save_summary(username, summary)
 
-            # Word Cloud
-            wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-            fig, ax = plt.subplots()
-            ax.imshow(wordcloud, interpolation="bilinear")
-            ax.axis("off")
-            st.pyplot(fig)
-
-# Multiple File Summarization
-elif option == "Multiple Files":
-    uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
-    if uploaded_files:
-        zip_buffer = BytesIO()
-        with ZipFile(zip_buffer, "w") as zip_file:
-            for file in uploaded_files:
-                text = file.read().decode("utf-8")
-                summary = summarize_text(text, 200, 50)
-                zip_file.writestr(f"{file.name}_summary.txt", summary)
-        zip_buffer.seek(0)
-        st.download_button("📦 Download All Summaries as ZIP", zip_buffer, "summaries.zip", "application/zip")
-
-# URL Summarization
-elif option == "URL":
-    url = st.text_input("Enter URL:")
-    if st.button("Extract and Summarize 🌐"):
-        text = extract_text_from_url(url)
-        if text.startswith("Error"):
-            st.error(text)
-        else:
-            summary = summarize_text(text, 200, 50)
-            st.subheader("📌 Summary:")
-            st.write(summary)
-
-# Compare Texts
-elif option == "Compare Texts":
-    text1 = st.text_area("Text 1:", height=200)
-    text2 = st.text_area("Text 2:", height=200)
-    if st.button("Compare Summaries ⚖️"):
-        summary1 = summarize_text(text1, 200, 50)
-        summary2 = summarize_text(text2, 200, 50)
-        st.write("📌 **Summary 1:**")
-        st.write(summary1)
-        st.write("📌 **Summary 2:**")
-        st.write(summary2)
-        st.write("✅ Are the summaries identical?", "Yes" if summary1 == summary2 else "No")
+            # Retrieve previous summaries
+            st.subheader("📜 Your Previous Summaries:")
+            st.write(firebase_config.get_summaries(username))
 
 # Summary History
-elif option == "Summary History":
+elif option == "Summary History" and authentication_status:
     st.subheader("📜 Summary History")
     if st.session_state.summary_history:
         for i, summary in enumerate(reversed(st.session_state.summary_history)):
@@ -199,3 +171,4 @@ elif option == "Summary History":
                 st.write(summary)
     else:
         st.write("No previous summaries found.")
+

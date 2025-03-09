@@ -29,15 +29,26 @@ summarizer = load_summarizer()
 sentiment_analyzer = load_sentiment_analyzer()
 keyword_extractor = KeyBERT()
 
+# Streamlit UI Configuration
+st.set_page_config(page_title="Text Summarizer Dashboard", layout="wide")
+st.markdown("""
+    <style>
+        .stApp { background-color: #f8f9fa; }
+        .main { padding: 2rem; }
+        h1 { color: #2c3e50; text-align: center; }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("📄 AI-Powered Text Summarizer Dashboard")
+st.sidebar.title("🔧 Features")
+option = st.sidebar.radio("Select an option:", ["Summarize Text", "Summarize from URL", "Compare Texts"])
+
 # Function to summarize text
 def summarize_text(text, max_length, min_length):
     if len(text.split()) < min_length:
-        return "Input text is too short to summarize."
+        return "⚠️ Input text is too short to summarize."
     summary = summarizer(
-        text,
-        max_length=max_length,
-        min_length=min_length,
-        do_sample=False,
+        text, max_length=max_length, min_length=min_length, do_sample=False
     )
     return summary[0]["summary_text"]
 
@@ -48,129 +59,50 @@ def extract_text_from_url(url):
     paragraphs = soup.find_all("p")
     return " ".join([p.text for p in paragraphs])
 
-# Function to create files (PDF, TXT, DOCX)
-def create_pdf(summary):
-    buffer = BytesIO()
-    pdf_canvas = canvas.Canvas(buffer, pagesize=letter)
-    pdf_canvas.setFont("Helvetica", 12)
-    pdf_canvas.drawString(30, 750, "Summary:")
-    text_obj = pdf_canvas.beginText(30, 730)
-    text_obj.setFont("Helvetica", 10)
-    for line in summary.split("\n"):
-        text_obj.textLine(line)
-    pdf_canvas.drawText(text_obj)
-    pdf_canvas.save()
-    buffer.seek(0)
-    return buffer
+# Layout
+col1, col2 = st.columns(2)
 
-def create_txt(summary):
-    return BytesIO(summary.encode())
+if option == "Summarize Text":
+    with col1:
+        st.subheader("📝 Enter Your Text")
+        text = st.text_area("Paste your text here:", height=250)
+    with col2:
+        if text.strip():
+            st.subheader("📊 Summary & Insights")
+            max_length = st.slider("Max summary length:", 50, 500, 200)
+            min_length = st.slider("Min summary length:", 10, 100, 50)
+            
+            if st.button("Summarize 🔍"):
+                summary = summarize_text(text, max_length, min_length)
+                st.success(summary)
+                sentiment = sentiment_analyzer(summary)[0]
+                st.write(f"**Sentiment:** {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
+                
+                keywords = keyword_extractor.extract_keywords(summary, top_n=5)
+                st.write("**Keywords:**", ", ".join([word for word, _ in keywords]))
+                
+                # Word Cloud
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
+                fig, ax = plt.subplots()
+                ax.imshow(wordcloud, interpolation="bilinear")
+                ax.axis("off")
+                st.pyplot(fig)
 
-def create_docx(summary):
-    doc = Document()
-    doc.add_heading("Summary", level=1)
-    doc.add_paragraph(summary)
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer
-
-# Function to create audio
-def text_to_speech(summary):
-    tts = gTTS(summary, lang="en")
-    buffer = BytesIO()
-    tts.write_to_fp(buffer)
-    buffer.seek(0)
-    return buffer
-
-# Streamlit App
-st.title("Text Summarizer - Enhanced")
-
-st.sidebar.title("Features")
-option = st.sidebar.radio(
-    "Choose an option:",
-    ["Single File", "Multiple Files", "URL", "Compare Texts"]
-)
-
-# Single File Summarization
-if option == "Single File":
-    st.write("Upload a text file or paste text below to summarize it.")
-
-    uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
-    if uploaded_file:
-        text = uploaded_file.read().decode("utf-8")
-    else:
-        text = st.text_area("Paste your text here:", height=200)
-
-    if text.strip():
-        st.write(f"Word Count: {len(text.split())}")
-        st.write(f"Character Count: {len(text)}")
-
-        max_length = st.slider("Max summary length (words):", 50, 500, 200)
-        min_length = st.slider("Min summary length (words):", 10, 100, 50)
-
-        if st.button("Summarize"):
-            summary = summarize_text(text, max_length, min_length)
-            st.subheader("Summary:")
-            st.write(summary)
-
-            sentiment = sentiment_analyzer(summary)[0]
-            st.write(f"Sentiment: {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
-
-            keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-            st.write("Keywords:", ", ".join([word for word, _ in keywords]))
-
-            pdf_data = create_pdf(summary)
-            st.download_button("Download PDF", pdf_data, "summary.pdf", "application/pdf")
-
-            txt_data = create_txt(summary)
-            st.download_button("Download TXT", txt_data, "summary.txt", "text/plain")
-
-            docx_data = create_docx(summary)
-            st.download_button("Download DOCX", docx_data, "summary.docx",
-                               "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-
-            audio_data = text_to_speech(summary)
-            st.audio(audio_data, format="audio/mp3")
-            st.download_button("Download Audio", audio_data, "summary.mp3", "audio/mpeg")
-
-            wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-            fig, ax = plt.subplots()
-            ax.imshow(wordcloud, interpolation="bilinear")
-            ax.axis("off")
-            st.pyplot(fig)
-
-# Multiple File Summarization
-elif option == "Multiple Files":
-    uploaded_files = st.file_uploader("Choose .txt files", type=["txt"], accept_multiple_files=True)
-    if uploaded_files:
-        zip_buffer = BytesIO()
-        with ZipFile(zip_buffer, "w") as zip_file:
-            for file in uploaded_files:
-                text = file.read().decode("utf-8")
-                summary = summarize_text(text, 200, 50)
-                zip_file.writestr(f"{file.name}_summary.txt", summary)
-        zip_buffer.seek(0)
-        st.download_button("Download All Summaries as ZIP", zip_buffer, "summaries.zip", "application/zip")
-
-# URL Summarization
-elif option == "URL":
-    url = st.text_input("Enter URL:")
-    if st.button("Extract and Summarize"):
+elif option == "Summarize from URL":
+    url = st.text_input("🔗 Enter URL:")
+    if st.button("Extract & Summarize"):
         text = extract_text_from_url(url)
         summary = summarize_text(text, 200, 50)
-        st.subheader("Summary:")
-        st.write(summary)
+        st.success(summary)
 
-# Compare Texts
 elif option == "Compare Texts":
-    text1 = st.text_area("Text 1:", height=200)
-    text2 = st.text_area("Text 2:", height=200)
+    text1 = st.text_area("Text 1", height=150)
+    text2 = st.text_area("Text 2", height=150)
     if st.button("Compare Summaries"):
         summary1 = summarize_text(text1, 200, 50)
         summary2 = summarize_text(text2, 200, 50)
-        st.write("Summary 1:")
-        st.write(summary1)
-        st.write("Summary 2:")
-        st.write(summary2)
-        st.write("Are the summaries identical?", "Yes" if summary1 == summary2 else "No")
+        st.write("**Summary 1:**")
+        st.success(summary1)
+        st.write("**Summary 2:**")
+        st.success(summary2)
+        st.write("Are the summaries identical?", "✅ Yes" if summary1 == summary2 else "❌ No")

@@ -1,6 +1,8 @@
 streamlit
 PyPDF2
+SpeechRecognition
 python-docx
-gtts
-speechrecognition
 pydub
+transformers
+torch
+sumy

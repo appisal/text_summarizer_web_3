@@ -1,4 +1,8 @@
 import streamlit as st
+
+# Set page config must be the first Streamlit command
+st.set_page_config(page_title="Text Summarizer Dashboard", layout="wide")
+
 from transformers import pipeline
 import torch
 from io import BytesIO
@@ -12,6 +16,8 @@ from keybert import KeyBERT
 from bs4 import BeautifulSoup
 import requests
 from zipfile import ZipFile
+
+# Rest of your Streamlit code...
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1

@@ -9,3 +9,5 @@ gtts
 keybert
 beautifulsoup4
 requests
+pandas
+numpy

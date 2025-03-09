@@ -6,3 +6,4 @@ pydub
 transformers
 torch
 sumy
+gensim

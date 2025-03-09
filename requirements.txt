@@ -9,7 +9,4 @@ gtts
 keybert
 beautifulsoup4
 requests
-scikit-learn  # Required for KeyBERT
-numpy  # Improves performance for word clouds
-pillow  # Required by wordcloud and reportlab
-langdetect  # Required if language detection is used
+zipfile36

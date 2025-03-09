@@ -1,114 +1,113 @@
 import streamlit as st
-
-# Set page config must be the first Streamlit command
-st.set_page_config(page_title="Text Summarizer Dashboard", layout="wide")
-
-from transformers import pipeline
-import torch
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from docx import Document
+import PyPDF2
+import docx
+import os
 from gtts import gTTS
-from keybert import KeyBERT
-from bs4 import BeautifulSoup
-import requests
-from zipfile import ZipFile
+from io import BytesIO
+import speech_recognition as sr
+from pydub import AudioSegment
+import tempfile
 
-# Rest of your Streamlit code...
+# ✅ Set Page Configuration (Must be the first command)
+st.set_page_config(page_title="Text Summarizer", layout="wide")
 
-# Check for GPU availability
-device = 0 if torch.cuda.is_available() else -1
+# ✅ Page Title
+st.title("📄 Text Summarizer")
+st.write("Upload a text file, audio file, or paste text below to summarize it.")
 
-# Load summarizer and sentiment analysis pipelines
-@st.cache_resource
-def load_summarizer():
-    return pipeline("summarization", model="facebook/bart-large-cnn", device=device)
+# ✅ Organize layout using columns
+col1, col2 = st.columns([2, 3])
 
-@st.cache_resource
-def load_sentiment_analyzer():
-    return pipeline("sentiment-analysis", device=device)
+# ✅ File upload section (Text, PDF, Word, Audio)
+with col1:
+    st.subheader("Choose a file to upload:")
+    uploaded_file = st.file_uploader("Drag & drop or browse", type=["txt", "pdf", "docx", "mp3", "wav"])
 
-summarizer = load_summarizer()
-sentiment_analyzer = load_sentiment_analyzer()
-keyword_extractor = KeyBERT()
+    # Read text from file
+    def extract_text_from_file(file):
+        text = ""
+        if file.name.endswith(".txt"):
+            text = file.read().decode("utf-8")
+        elif file.name.endswith(".pdf"):
+            pdf_reader = PyPDF2.PdfReader(file)
+            text = "\n".join([page.extract_text() for page in pdf_reader.pages if page.extract_text()])
+        elif file.name.endswith(".docx"):
+            doc = docx.Document(file)
+            text = "\n".join([para.text for para in doc.paragraphs])
+        return text
 
-# Streamlit UI Configuration
-#st.set_page_config(page_title="Text Summarizer Dashboard", layout="wide")
-st.markdown("""
-    <style>
-        .stApp { background-color: #f8f9fa; }
-        .main { padding: 2rem; }
-        h1 { color: #2c3e50; text-align: center; }
-    </style>
-""", unsafe_allow_html=True)
+    # Read text from audio file
+    def extract_text_from_audio(file):
+        temp_dir = tempfile.mkdtemp()
+        temp_path = os.path.join(temp_dir, file.name)
+        with open(temp_path, "wb") as f:
+            f.write(file.read())
+        
+        audio = AudioSegment.from_file(temp_path)
+        audio.export(temp_path, format="wav")
 
-st.title("📄 AI-Powered Text Summarizer Dashboard")
-st.sidebar.title("🔧 Features")
-option = st.sidebar.radio("Select an option:", ["Summarize Text", "Summarize from URL", "Compare Texts"])
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(temp_path) as source:
+            audio_data = recognizer.record(source)
+            try:
+                return recognizer.recognize_google(audio_data)
+            except sr.UnknownValueError:
+                return "Could not understand audio"
+            except sr.RequestError:
+                return "Speech recognition service unavailable"
 
-# Function to summarize text
-def summarize_text(text, max_length, min_length):
-    if len(text.split()) < min_length:
-        return "⚠️ Input text is too short to summarize."
-    summary = summarizer(
-        text, max_length=max_length, min_length=min_length, do_sample=False
-    )
-    return summary[0]["summary_text"]
+    if uploaded_file:
+        if uploaded_file.name.endswith((".txt", ".pdf", ".docx")):
+            extracted_text = extract_text_from_file(uploaded_file)
+        elif uploaded_file.name.endswith((".mp3", ".wav")):
+            extracted_text = extract_text_from_audio(uploaded_file)
+        else:
+            extracted_text = ""
+    else:
+        extracted_text = ""
 
-# Function to extract text from URL
-def extract_text_from_url(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    paragraphs = soup.find_all("p")
-    return " ".join([p.text for p in paragraphs])
+# ✅ Text Input Section
+with col2:
+    st.subheader("Paste your text here:")
+    text_input = st.text_area("Enter text:", extracted_text, height=200)
 
-# Layout
+# ✅ Summary Length Controls
+st.subheader("Summary Length:")
 col1, col2 = st.columns(2)
+with col1:
+    min_words = st.slider("Min words", 10, 100, 50)
+with col2:
+    max_words = st.slider("Max words", 50, 500, 200)
 
-if option == "Summarize Text":
-    with col1:
-        st.subheader("📝 Enter Your Text")
-        text = st.text_area("Paste your text here:", height=250)
-    with col2:
-        if text.strip():
-            st.subheader("📊 Summary & Insights")
-            max_length = st.slider("Max summary length:", 50, 500, 200)
-            min_length = st.slider("Min summary length:", 10, 100, 50)
-            
-            if st.button("Summarize 🔍"):
-                summary = summarize_text(text, max_length, min_length)
-                st.success(summary)
-                sentiment = sentiment_analyzer(summary)[0]
-                st.write(f"**Sentiment:** {sentiment['label']} (Confidence: {sentiment['score']:.2f})")
-                
-                keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-                st.write("**Keywords:**", ", ".join([word for word, _ in keywords]))
-                
-                # Word Cloud
-                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(summary)
-                fig, ax = plt.subplots()
-                ax.imshow(wordcloud, interpolation="bilinear")
-                ax.axis("off")
-                st.pyplot(fig)
+# ✅ Summarization Button
+if st.button("Summarize", use_container_width=True):
+    if not text_input:
+        st.warning("⚠️ Please provide text to summarize.")
+    else:
+        summary = f"📝 [Summarized Text] (Mock Summary - Replace with actual logic)\n\n{text_input[:min_words]}..."
+        st.success("✅ Summary Generated!")
+        st.text_area("Summary:", summary, height=150)
 
-elif option == "Summarize from URL":
-    url = st.text_input("🔗 Enter URL:")
-    if st.button("Extract & Summarize"):
-        text = extract_text_from_url(url)
-        summary = summarize_text(text, 200, 50)
-        st.success(summary)
+        # ✅ Download as PDF
+        pdf_bytes = BytesIO()
+        pdf = docx.Document()
+        pdf.add_paragraph(summary)
+        pdf.save(pdf_bytes)
+        pdf_bytes.seek(0)
+        st.download_button("📥 Download as PDF", pdf_bytes, "summary.pdf", "application/pdf")
 
-elif option == "Compare Texts":
-    text1 = st.text_area("Text 1", height=150)
-    text2 = st.text_area("Text 2", height=150)
-    if st.button("Compare Summaries"):
-        summary1 = summarize_text(text1, 200, 50)
-        summary2 = summarize_text(text2, 200, 50)
-        st.write("**Summary 1:**")
-        st.success(summary1)
-        st.write("**Summary 2:**")
-        st.success(summary2)
-        st.write("Are the summaries identical?", "✅ Yes" if summary1 == summary2 else "❌ No")
+        # ✅ Download as Word
+        doc_bytes = BytesIO()
+        doc = docx.Document()
+        doc.add_paragraph(summary)
+        doc.save(doc_bytes)
+        doc_bytes.seek(0)
+        st.download_button("📥 Download as Word", doc_bytes, "summary.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+        # ✅ Download as Audio (MP3)
+        tts = gTTS(text=summary, lang="en")
+        audio_bytes = BytesIO()
+        tts.save(audio_bytes)
+        audio_bytes.seek(0)
+        st.download_button("🔊 Download as MP3", audio_bytes, "summary.mp3", "audio/mpeg")
+

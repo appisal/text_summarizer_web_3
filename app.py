@@ -36,7 +36,7 @@ sentiment_analyzer = load_sentiment_analyzer()
 keyword_extractor = KeyBERT()
 
 # Streamlit UI Configuration
-st.set_page_config(page_title="Text Summarizer Dashboard", layout="wide")
+#st.set_page_config(page_title="Text Summarizer Dashboard", layout="wide")
 st.markdown("""
     <style>
         .stApp { background-color: #f8f9fa; }

@@ -12,3 +12,7 @@ requests
 scikit-learn  # Required for KeyBERT
 numpy  # Improves performance for word clouds
 pillow  # Required by wordcloud and reportlab
+sentence-transformers  # Enhances KeyBERT performance
+bertopic  # Enables topic modeling
+pandas  # Useful for data processing
+scipy  # Enhances similarity calculations

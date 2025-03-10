@@ -22,7 +22,6 @@ st.markdown("""
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .title-container {
             text-align: center;
             animation: fadeIn 1.5s ease-in-out;
@@ -33,47 +32,35 @@ st.markdown("""
             -webkit-text-fill-color: transparent;
             padding: 10px;
         }
-
         .ai-avatar {
             display: flex;
             justify-content: center;
-            margin-top: 10px;
+            margin-bottom: 10px;
         }
         .ai-avatar img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 60px;
+            height: 60px;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+        .section-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff4b2b;
+            background: -webkit-linear-gradient(45deg, #ff416c, #ff4b2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stTextArea, .stFileUploader {
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
         }
     </style>
-
     <div class="ai-avatar">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Artificial_Intelligence_Icon.png">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Emoji_u1f916.svg">
     </div>
     <div class="title-container">🚀 AI-Powered Text Summarizer</div>
 """, unsafe_allow_html=True)
 
-# Enhanced Typography
-st.markdown("""
-    <style>
-        .summary-text {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.2rem;
-            color: #333;
-            line-height: 1.6;
-            text-align: justify;
-        }
-        .gradient-header {
-            background: linear-gradient(135deg, #ff4b2b, #ff7f50);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 20px;
-        }
-    </style>
-""", unsafe_allow_html=True)
 
 
 # Load models

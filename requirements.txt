@@ -1,14 +1,13 @@
 streamlit
 transformers
 torch
-reportlab
 wordcloud
 matplotlib
 seaborn
-python-docx
-gtts
 keybert
+gtts
+reportlab
+python-docx
 beautifulsoup4
 requests
-zipfile36
 urllib3

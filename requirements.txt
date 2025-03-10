@@ -4,6 +4,7 @@ torch
 reportlab
 wordcloud
 matplotlib
+seaborn
 python-docx
 gtts
 keybert

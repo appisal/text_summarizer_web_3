@@ -11,3 +11,4 @@ keybert
 beautifulsoup4
 requests
 zipfile36
+urllib3

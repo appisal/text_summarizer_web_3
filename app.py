@@ -48,7 +48,7 @@ def generate_share_links(summary):
     }
 
 # Streamlit App Header with Logo
-st.image("https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg", width=100)  # Replace with your logo URL
+st.image("https://in.images.search.yahoo.com/search/images;_ylt=Awrx.olk6c5nzJQyJ4O9HAx.;_ylu=c2VjA3NlYXJjaARzbGsDYnV0dG9u;_ylc=X1MDMjExNDcyMzAwNQRfcgMyBGZyA21jYWZlZQRmcjIDcDpzLHY6aSxtOnNiLXRvcARncHJpZANRWWhKX2tDeVF5eXplTnBZSi55NFpBBG5fcnNsdAMwBG5fc3VnZwMwBG9yaWdpbgNpbi5pbWFnZXMuc2VhcmNoLnlhaG9vLmNvbQRwb3MDMARwcXN0cgMEcHFzdHJsAzAEcXN0cmwDMzAEcXVlcnkDdGV4dCUyMHN1bW1hcml6ZXJsJTIwbG9nbyUyMHBuZyUyMGZyZWUEdF9zdG1wAzE3NDE2MTM0MTc-?p=text+summarizerl+logo+png+free&fr=mcafee&fr2=p%3As%2Cv%3Ai%2Cm%3Asb-top&ei=UTF-8&x=wrt&type=E210IN885G0#id=7&iurl=https%3A%2F%2Fsummarizer-ai.com%2F_next%2Fstatic%2Fmedia%2Flogo-main.eda27e57.png&action=click", width=100)  # Replace with your logo URL
 st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🚀 Text Summarizer</h1>", unsafe_allow_html=True)
 
 st.sidebar.title("⚡ Features")

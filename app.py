@@ -53,6 +53,38 @@ def generate_share_links(summary):
         "LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
     }
 
+# Function to create share buttons with icons
+def create_share_buttons(summary):
+    share_links = generate_share_links(summary)
+    share_html = f"""
+    <style>
+        .share-btns {{
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }}
+        .share-btns a img {{
+            width: 40px;
+            height: 40px;
+        }}
+    </style>
+    <div class="share-btns">
+        <a href="{share_links['WhatsApp']}" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
+        </a>
+        <a href="{share_links['Twitter']}" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/en/6/60/Twitter_Logo_as_of_2021.svg">
+        </a>
+        <a href="{share_links['Email']}" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28iOS%29.svg">
+        </a>
+        <a href="{share_links['LinkedIn']}" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png">
+        </a>
+    </div>
+    """
+    st.markdown(share_html, unsafe_allow_html=True)
+
 # Function to download summary as PDF
 def download_pdf(summary):
     buffer = BytesIO()
@@ -115,13 +147,10 @@ if option == "Single File":
                     st.download_button("📝 Word", download_word(summary), file_name="summary.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
                 with col3:
                     st.download_button("🔊 Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
-
-                # Share Buttons with Icons
-                st.markdown("<h4>📢 Share:</h4>", unsafe_allow_html=True)
-                cols = st.columns(4)
-                icons = ["📱", "🐦", "✉️", "🔗"]  # Icons for WhatsApp, Twitter, Email, LinkedIn
-                for col, (icon, (label, link)) in zip(cols, zip(icons, generate_share_links(summary).items())):
-                    col.markdown(f'<a href="{link}" target="_blank">{icon}</a>', unsafe_allow_html=True)
+                
+                # Display Share Buttons
+                st.markdown("### 📢 Share this Summary:")
+                create_share_buttons(summary)
 
 # Bulk File Processing
 elif option == "Bulk File Processing":
@@ -132,21 +161,9 @@ elif option == "Bulk File Processing":
             summary = summarize_text(text, 200, 50)
             st.markdown(f"### 📜 Summary for {file.name}")
             st.success(summary)
-
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.download_button("📄 PDF", download_pdf(summary), file_name=f"summary_{file.name}.pdf", mime="application/pdf")
-            with col2:
-                st.download_button("📝 Word", download_word(summary), file_name=f"summary_{file.name}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-            with col3:
-                st.download_button("🔊 Audio", download_audio(summary), file_name=f"summary_{file.name}.mp3", mime="audio/mp3")
-
-            # Share Buttons with Icons
-            st.markdown("<h4>📢 Share:</h4>", unsafe_allow_html=True)
-            cols = st.columns(4)
-            icons = ["📱", "🐦", "✉️", "🔗"]
-            for col, (icon, (label, link)) in zip(cols, zip(icons, generate_share_links(summary).items())):
-                col.markdown(f'<a href="{link}" target="_blank">{icon}</a>', unsafe_allow_html=True)
+            st.download_button("📄 PDF", download_pdf(summary), file_name=f"summary_{file.name}.pdf", mime="application/pdf")
+            st.download_button("📝 Word", download_word(summary), file_name=f"summary_{file.name}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            st.download_button("🔊 Audio", download_audio(summary), file_name=f"summary_{file.name}.mp3", mime="audio/mp3")
 
 # Summary History
 elif option == "Summary History":
@@ -155,16 +172,6 @@ elif option == "Summary History":
         for i, summary in enumerate(reversed(st.session_state.summary_history)):
             with st.expander(f"📄 Summary {len(st.session_state.summary_history) - i}"):
                 st.write(summary)
-        
-        # Export history
-        st.markdown("### 📥 Export Options:")
-        pdf_buffer = download_pdf("\n\n".join(st.session_state.summary_history))
-        st.download_button("📄 Download All Summaries as PDF", pdf_buffer, file_name="all_summaries.pdf", mime="application/pdf")
-
-        if st.button("🧹 Clear History"):
-            st.session_state.summary_history = []
-            st.rerun()
-    else:
-        st.write("🔍 No previous summaries found.")
+                create_share_buttons(summary)
 
 st.markdown("<hr><p style='text-align: center;'>© 2025 Text Summarizer AI | Built with ❤️ using Streamlit</p>", unsafe_allow_html=True)

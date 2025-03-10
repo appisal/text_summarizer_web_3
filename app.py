@@ -47,10 +47,10 @@ def summarize_text(text, max_length, min_length):
 def generate_share_links(summary):
     encoded_summary = urllib.parse.quote(summary)
     return {
-        "📧 Email": f"mailto:?subject=Summary&body={encoded_summary}",
-        "📱 WhatsApp": f"https://wa.me/?text={encoded_summary}",
-        "🐦 Twitter": f"https://twitter.com/intent/tweet?text={encoded_summary}",
-        "🔗 LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
+        "WhatsApp": f"https://wa.me/?text={encoded_summary}",
+        "Twitter": f"https://twitter.com/intent/tweet?text={encoded_summary}",
+        "Email": f"mailto:?subject=Summary&body={encoded_summary}",
+        "LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
     }
 
 # Function to download summary as PDF
@@ -116,11 +116,12 @@ if option == "Single File":
                 with col3:
                     st.download_button("🔊 Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
 
-                # Share Buttons
-                st.markdown("<h4>📢 Share Summary:</h4>", unsafe_allow_html=True)
+                # Share Buttons with Icons
+                st.markdown("<h4>📢 Share:</h4>", unsafe_allow_html=True)
                 cols = st.columns(4)
-                for col, (label, link) in zip(cols, generate_share_links(summary).items()):
-                    col.markdown(f'<a href="{link}" target="_blank">{label}</a>', unsafe_allow_html=True)
+                icons = ["📱", "🐦", "✉️", "🔗"]  # Icons for WhatsApp, Twitter, Email, LinkedIn
+                for col, (icon, (label, link)) in zip(cols, zip(icons, generate_share_links(summary).items())):
+                    col.markdown(f'<a href="{link}" target="_blank">{icon}</a>', unsafe_allow_html=True)
 
 # Bulk File Processing
 elif option == "Bulk File Processing":
@@ -140,11 +141,12 @@ elif option == "Bulk File Processing":
             with col3:
                 st.download_button("🔊 Audio", download_audio(summary), file_name=f"summary_{file.name}.mp3", mime="audio/mp3")
 
-            # Share Buttons
-            st.markdown("<h4>📢 Share Summary:</h4>", unsafe_allow_html=True)
+            # Share Buttons with Icons
+            st.markdown("<h4>📢 Share:</h4>", unsafe_allow_html=True)
             cols = st.columns(4)
-            for col, (label, link) in zip(cols, generate_share_links(summary).items()):
-                col.markdown(f'<a href="{link}" target="_blank">{label}</a>', unsafe_allow_html=True)
+            icons = ["📱", "🐦", "✉️", "🔗"]
+            for col, (icon, (label, link)) in zip(cols, zip(icons, generate_share_links(summary).items())):
+                col.markdown(f'<a href="{link}" target="_blank">{icon}</a>', unsafe_allow_html=True)
 
 # Summary History
 elif option == "Summary History":

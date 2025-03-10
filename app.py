@@ -3,11 +3,7 @@ from transformers import pipeline
 import torch
 from io import BytesIO
 from gtts import gTTS
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-import seaborn as sns
 from keybert import KeyBERT
-import time
 import urllib.parse  
 
 # GPU Check
@@ -51,36 +47,8 @@ def generate_share_links(summary):
         "🔗 LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
     }
 
-# Function to download summary as PDF
-def download_pdf(summary):
-    buffer = BytesIO()
-    from reportlab.pdfgen import canvas
-    pdf = canvas.Canvas(buffer)
-    pdf.drawString(100, 750, "Summary Report")
-    pdf.drawString(100, 730, summary)
-    pdf.save()
-    buffer.seek(0)
-    return buffer
-
-# Function to download summary as Word
-def download_word(summary):
-    from docx import Document
-    doc = Document()
-    doc.add_paragraph(summary)
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer
-
-# Function to download summary as audio
-def download_audio(summary):
-    tts = gTTS(summary, lang="en")
-    buffer = BytesIO()
-    tts.write_to_fp(buffer)
-    buffer.seek(0)
-    return buffer
-
-# Streamlit App Header
+# Streamlit App Header with Logo
+st.image("https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg", width=100)  # Replace with your logo URL
 st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🚀 Text Summarizer</h1>", unsafe_allow_html=True)
 
 st.sidebar.title("⚡ Features")
@@ -102,23 +70,6 @@ if option == "Single File":
             if summary:
                 st.subheader("📌 Summary:")
                 st.success(summary)
-
-                # Download buttons
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.download_button("📄 Download PDF", download_pdf(summary), file_name="summary.pdf", mime="application/pdf")
-                with col2:
-                    st.download_button("📝 Download Word", download_word(summary), file_name="summary.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-                with col3:
-                    st.download_button("🔊 Download Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
-
-                # Sentiment Analysis
-                sentiment = sentiment_analyzer(summary)[0]
-                st.write(f"📊 **Sentiment:** **{sentiment['label']}** (Confidence: {sentiment['score']:.2f})")
-
-                # Keywords Extraction
-                keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-                st.write("🔑 **Keywords:**", ", ".join([word for word, _ in keywords]))
 
                 # Share Summary with Icons
                 st.markdown("### 📢 Share Summary:")

@@ -116,6 +116,12 @@ if option == "Single File":
                 with col3:
                     st.download_button("🔊 Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
 
+                # Share Buttons
+                st.markdown("<h4>📢 Share Summary:</h4>", unsafe_allow_html=True)
+                cols = st.columns(4)
+                for col, (label, link) in zip(cols, generate_share_links(summary).items()):
+                    col.markdown(f'<a href="{link}" target="_blank">{label}</a>', unsafe_allow_html=True)
+
 # Bulk File Processing
 elif option == "Bulk File Processing":
     uploaded_files = st.file_uploader("Upload multiple .txt files", type=["txt"], accept_multiple_files=True)
@@ -125,9 +131,20 @@ elif option == "Bulk File Processing":
             summary = summarize_text(text, 200, 50)
             st.markdown(f"### 📜 Summary for {file.name}")
             st.success(summary)
-            st.download_button("📄 PDF", download_pdf(summary), file_name=f"summary_{file.name}.pdf", mime="application/pdf")
-            st.download_button("📝 Word", download_word(summary), file_name=f"summary_{file.name}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-            st.download_button("🔊 Audio", download_audio(summary), file_name=f"summary_{file.name}.mp3", mime="audio/mp3")
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.download_button("📄 PDF", download_pdf(summary), file_name=f"summary_{file.name}.pdf", mime="application/pdf")
+            with col2:
+                st.download_button("📝 Word", download_word(summary), file_name=f"summary_{file.name}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            with col3:
+                st.download_button("🔊 Audio", download_audio(summary), file_name=f"summary_{file.name}.mp3", mime="audio/mp3")
+
+            # Share Buttons
+            st.markdown("<h4>📢 Share Summary:</h4>", unsafe_allow_html=True)
+            cols = st.columns(4)
+            for col, (label, link) in zip(cols, generate_share_links(summary).items()):
+                col.markdown(f'<a href="{link}" target="_blank">{label}</a>', unsafe_allow_html=True)
 
 # Summary History
 elif option == "Summary History":
@@ -138,10 +155,10 @@ elif option == "Summary History":
                 st.write(summary)
         
         # Export history
-        if st.button("📥 Export All Summaries to PDF"):
-            pdf_buffer = download_pdf("\n\n".join(st.session_state.summary_history))
-            st.download_button("Download PDF", pdf_buffer, file_name="all_summaries.pdf", mime="application/pdf")
-        
+        st.markdown("### 📥 Export Options:")
+        pdf_buffer = download_pdf("\n\n".join(st.session_state.summary_history))
+        st.download_button("📄 Download All Summaries as PDF", pdf_buffer, file_name="all_summaries.pdf", mime="application/pdf")
+
         if st.button("🧹 Clear History"):
             st.session_state.summary_history = []
             st.rerun()

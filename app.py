@@ -2,17 +2,10 @@ import streamlit as st
 from transformers import pipeline
 import torch
 from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import seaborn as sns
-from docx import Document
-from gtts import gTTS
 from keybert import KeyBERT
-from bs4 import BeautifulSoup
-import requests
-from zipfile import ZipFile
 import time
 import urllib.parse  # For sharing URLs
 
@@ -41,28 +34,22 @@ def summarize_text(text, max_length, min_length):
     if len(text.split()) < min_length:
         return "Input text is too short to summarize."
 
-    progress_bar = st.progress(0)
-    for percent in range(1, 101, 10):
-        time.sleep(0.05)  # Simulate processing delay
-        progress_bar.progress(percent)
-
-    summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)
-    progress_bar.empty()
+    with st.spinner("🔄 Summarizing... Please wait."):
+        summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)
 
     # Save to history
     st.session_state.summary_history.append(summary[0]["summary_text"])
-
     return summary[0]["summary_text"]
 
-# Function to generate a shareable summary link
+# Function to generate shareable summary links
 def generate_share_links(summary):
     encoded_summary = urllib.parse.quote(summary)
-    email_link = f"mailto:?subject=Check%20this%20Summary&body={encoded_summary}"
-    whatsapp_link = f"https://wa.me/?text={encoded_summary}"
-    twitter_link = f"https://twitter.com/intent/tweet?text={encoded_summary}"
-    linkedin_link = f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
-    
-    return email_link, whatsapp_link, twitter_link, linkedin_link
+    return {
+        "📧 Email": f"mailto:?subject=Summary&body={encoded_summary}",
+        "📱 WhatsApp": f"https://wa.me/?text={encoded_summary}",
+        "🐦 Twitter": f"https://twitter.com/intent/tweet?text={encoded_summary}",
+        "🔗 LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
+    }
 
 # Streamlit App Header
 st.markdown(
@@ -75,20 +62,13 @@ st.markdown(
 )
 
 st.sidebar.title("⚡ Features")
-option = st.sidebar.radio(
-    "Choose an option:",
-    ["Single File", "Multiple Files", "URL", "Compare Texts", "Summary History"]
-)
+option = st.sidebar.radio("Choose an option:", ["Single File", "Summary History"])
 
 # Single File Summarization
 if option == "Single File":
     st.write("📂 Upload a text file or paste text below to summarize it.")
-
     uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
-    if uploaded_file:
-        text = uploaded_file.read().decode("utf-8")
-    else:
-        text = st.text_area("✍️ Paste your text here:", height=200)
+    text = uploaded_file.read().decode("utf-8") if uploaded_file else st.text_area("✍️ Paste your text here:", height=200)
 
     if text.strip():
         original_word_count = len(text.split())
@@ -98,21 +78,20 @@ if option == "Single File":
         max_length = st.slider("📏 Max summary length (words):", 50, 500, 200)
         min_length = st.slider("📏 Min summary length (words):", 10, 100, 50)
 
-        if st.button("✨ Summarize"):
+        if st.button("✨ Summarize", use_container_width=True):
             summary = summarize_text(text, max_length, min_length)
             summarized_word_count = len(summary.split())
             reduction_percentage = (1 - (summarized_word_count / original_word_count)) * 100
 
             st.subheader("📌 Summary:")
-            st.write(summary)
+            st.success(summary)
 
-            # Display Summary Reduction
+            # Display Reduction
             st.write(f"📉 **Reduction:** {reduction_percentage:.2f}% fewer words!")
 
-            # Word Count Comparison Chart
-            chart_data = {"Original": original_word_count, "Summarized": summarized_word_count}
+            # Word Count Chart
             fig, ax = plt.subplots()
-            sns.barplot(x=list(chart_data.keys()), y=list(chart_data.values()), palette=["#FF4B4B", "#4BFFB3"])
+            sns.barplot(x=["Original", "Summarized"], y=[original_word_count, summarized_word_count], palette=["#FF4B4B", "#4BFFB3"])
             plt.ylabel("Word Count")
             plt.title("📊 Word Reduction Chart")
             st.pyplot(fig)
@@ -125,20 +104,11 @@ if option == "Single File":
             keywords = keyword_extractor.extract_keywords(summary, top_n=5)
             st.write("🔑 **Keywords:**", ", ".join([word for word, _ in keywords]))
 
-            # Generate Share Links
-            email_link, whatsapp_link, twitter_link, linkedin_link = generate_share_links(summary)
-
-            # Share Buttons
+            # Share Summary
             st.markdown("### 📢 Share Summary:")
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.markdown(f'<a href="{email_link}" target="_blank">📧 **Email**</a>', unsafe_allow_html=True)
-            with col2:
-                st.markdown(f'<a href="{whatsapp_link}" target="_blank">📱 **WhatsApp**</a>', unsafe_allow_html=True)
-            with col3:
-                st.markdown(f'<a href="{twitter_link}" target="_blank">🐦 **Twitter**</a>', unsafe_allow_html=True)
-            with col4:
-                st.markdown(f'<a href="{linkedin_link}" target="_blank">🔗 **LinkedIn**</a>', unsafe_allow_html=True)
+            cols = st.columns(4)
+            for col, (label, link) in zip(cols, generate_share_links(summary).items()):
+                col.markdown(f'<a href="{link}" target="_blank">{label}</a>', unsafe_allow_html=True)
 
 # Summary History
 elif option == "Summary History":

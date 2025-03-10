@@ -18,10 +18,13 @@ device = 0 if torch.cuda.is_available() else -1
 # Apply global CSS animations and styles
 st.markdown("""
     <style>
+        /* Smooth Fade-in Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Animated Title */
         .title-container {
             text-align: center;
             animation: fadeIn 1.5s ease-in-out;
@@ -32,35 +35,70 @@ st.markdown("""
             -webkit-text-fill-color: transparent;
             padding: 10px;
         }
-        .ai-avatar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
+
+        /* Sidebar Animation */
+        .sidebar-title {
+            animation: fadeIn 1s ease-in-out;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff4b4b;
+            text-align: center;
         }
-        .ai-avatar img {
-            width: 60px;
-            height: 60px;
-            animation: fadeIn 1.2s ease-in-out;
-        }
+
+        /* Section Headers */
         .section-header {
+            animation: fadeIn 1.2s ease-in-out;
             font-size: 1.8rem;
             font-weight: bold;
-            color: #ff4b2b;
-            background: -webkit-linear-gradient(45deg, #ff416c, #ff4b2b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-top: 20px;
+            color: #333;
         }
+
+        /* Buttons Hover Effect */
+        .stButton > button {
+            transition: all 0.3s ease-in-out;
+            border-radius: 10px !important;
+            background: linear-gradient(135deg, #ff4b2b, #ff7f50);
+            color: white !important;
+            font-weight: bold;
+            padding: 10px;
+        }
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #ff7f50, #ff416c);
+            transform: scale(1.05);
+        }
+
+        /* Share Buttons */
+        .share-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            animation: fadeIn 1.3s ease-in-out;
+        }
+        .share-btns a img {
+            width: 45px;
+            height: 45px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .share-btns a img:hover {
+            transform: scale(1.2);
+        }
+
+        /* Smooth Box Shadows */
         .stTextArea, .stFileUploader {
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
             border-radius: 10px;
         }
+        .stTextArea:hover, .stFileUploader:hover {
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
     </style>
-    <div class="ai-avatar">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Emoji_u1f916.svg">
-    </div>
+    
     <div class="title-container">🚀 AI-Powered Text Summarizer</div>
 """, unsafe_allow_html=True)
-
 
 
 # Load models

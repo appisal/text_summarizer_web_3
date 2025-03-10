@@ -23,7 +23,44 @@ st.markdown("""
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
+        /* Slide-in Animation */
+        @keyframes slideIn {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Neon Glow Effect */
+        .neon-glow {
+            text-shadow: 0 0 5px #ff4b4b, 0 0 10px #ff7f50, 0 0 15px #ff4b2b;
+        }
+
+        /* 3D Button Effect */
+        .stButton > button {
+            transition: all 0.3s ease-in-out;
+            border-radius: 10px !important;
+            background: linear-gradient(135deg, #ff4b2b, #ff7f50);
+            color: white !important;
+            font-weight: bold;
+            padding: 10px;
+            box-shadow: 0 4px #d94f4f;
+        }
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #ff7f50, #ff416c);
+            transform: scale(1.05);
+            box-shadow: 0 6px #ff4b4b;
+        }
+
+        /* Animated Icons */
+        .share-btns a img {
+            width: 45px;
+            height: 45px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .share-btns a img:hover {
+            transform: scale(1.2) rotate(10deg);
+        }
+
         /* Animated Title */
         .title-container {
             text-align: center;
@@ -47,59 +84,16 @@ st.markdown("""
 
         /* Section Headers */
         .section-header {
-            animation: fadeIn 1.2s ease-in-out;
+            animation: slideIn 1.2s ease-in-out;
             font-size: 1.8rem;
             font-weight: bold;
             margin-top: 20px;
             color: #333;
         }
-
-        /* Buttons Hover Effect */
-        .stButton > button {
-            transition: all 0.3s ease-in-out;
-            border-radius: 10px !important;
-            background: linear-gradient(135deg, #ff4b2b, #ff7f50);
-            color: white !important;
-            font-weight: bold;
-            padding: 10px;
-        }
-        .stButton > button:hover {
-            background: linear-gradient(135deg, #ff7f50, #ff416c);
-            transform: scale(1.05);
-        }
-
-        /* Share Buttons */
-        .share-btns {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-            animation: fadeIn 1.3s ease-in-out;
-        }
-        .share-btns a img {
-            width: 45px;
-            height: 45px;
-            transition: transform 0.3s ease-in-out;
-        }
-        .share-btns a img:hover {
-            transform: scale(1.2);
-        }
-
-        /* Smooth Box Shadows */
-        .stTextArea, .stFileUploader {
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
-            border-radius: 10px;
-        }
-        .stTextArea:hover, .stFileUploader:hover {
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
-        }
-
     </style>
     
-    <div class="title-container">🚀 AI-Powered Text Summarizer</div>
+    <div class="title-container neon-glow"> AI-Powered Text Summarizer</div>
 """, unsafe_allow_html=True)
-
 
 # Load models
 @st.cache_resource

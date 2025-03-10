@@ -81,14 +81,21 @@ def download_audio(summary):
     return buffer
 
 # Streamlit App Header
-st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🚀 Text Summarizer</h1>", unsafe_allow_html=True)
+st.markdown("""
+    <h1 style='text-align: center; color: #FF4B4B; font-size: 3rem;'>
+        🚀 AI Text Summarizer
+    </h1>
+    <hr style='border-top: 3px solid #FF4B4B;'>
+""", unsafe_allow_html=True)
 
+# Sidebar with Logo
+st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg", width=100)  # Replace with your logo
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Summary History"])
 
 # Single File Summarization
 if option == "Single File":
-    st.write("📂 Upload a text file or paste text below to summarize it.")
+    st.markdown("<h3 style='color: #333;'>📂 Upload a text file or paste text below to summarize it.</h3>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
     text = uploaded_file.read().decode("utf-8") if uploaded_file else st.text_area("✍️ Paste your text here:", height=200)
 
@@ -100,28 +107,29 @@ if option == "Single File":
             summary = summarize_text(text, max_length, min_length)
 
             if summary:
-                st.subheader("📌 Summary:")
+                st.markdown("<h3 style='color: #FF4B4B;'>📌 Summary:</h3>", unsafe_allow_html=True)
                 st.success(summary)
 
                 # Download buttons
+                st.markdown("<h4 style='margin-top: 20px;'>⬇️ Download Options:</h4>", unsafe_allow_html=True)
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.download_button("📄 Download PDF", download_pdf(summary), file_name="summary.pdf", mime="application/pdf")
+                    st.download_button("📄 PDF", download_pdf(summary), file_name="summary.pdf", mime="application/pdf")
                 with col2:
-                    st.download_button("📝 Download Word", download_word(summary), file_name="summary.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                    st.download_button("📝 Word", download_word(summary), file_name="summary.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
                 with col3:
-                    st.download_button("🔊 Download Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
+                    st.download_button("🔊 Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
 
                 # Sentiment Analysis
                 sentiment = sentiment_analyzer(summary)[0]
-                st.write(f"📊 **Sentiment:** **{sentiment['label']}** (Confidence: {sentiment['score']:.2f})")
+                st.markdown(f"<h4>📊 Sentiment: <span style='color: green;'>{sentiment['label']}</span> (Confidence: {sentiment['score']:.2f})</h4>", unsafe_allow_html=True)
 
                 # Keywords Extraction
                 keywords = keyword_extractor.extract_keywords(summary, top_n=5)
-                st.write("🔑 **Keywords:**", ", ".join([word for word, _ in keywords]))
+                st.markdown("🔑 **Keywords:** " + ", ".join([word for word, _ in keywords]))
 
                 # Share Summary with Icons
-                st.markdown("### 📢 Share Summary:")
+                st.markdown("<h4>📢 Share Summary:</h4>", unsafe_allow_html=True)
                 cols = st.columns(4)
                 for col, (label, link) in zip(cols, generate_share_links(summary).items()):
                     if "WhatsApp" in label:
@@ -144,4 +152,9 @@ elif option == "Summary History":
         st.write("🔍 No previous summaries found.")
 
 # Footer
-st.markdown("<br><hr><p style='text-align: center;'>© 2025 Text Summarizer AI</p>", unsafe_allow_html=True)
+st.markdown("""
+    <hr>
+    <p style='text-align: center; font-size: 14px; color: #555;'>
+        © 2025 Text Summarizer AI | Built with ❤️ using Streamlit
+    </p>
+""", unsafe_allow_html=True)

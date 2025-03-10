@@ -14,6 +14,27 @@ from docx import Document
 
 # GPU Check
 device = 0 if torch.cuda.is_available() else -1
+# Stylish Animated Title
+st.markdown("""
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .title-container {
+            text-align: center;
+            animation: fadeIn 1.5s ease-in-out;
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b, #ff7f50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding: 10px;
+        }
+    </style>
+    <div class="title-container">🚀 AI-Powered Text Summarizer</div>
+""", unsafe_allow_html=True)
+
 
 # Load models
 @st.cache_resource

@@ -8,6 +8,10 @@ import seaborn as sns
 from keybert import KeyBERT
 import time
 import urllib.parse  # For sharing URLs
+from gtts import gTTS  # For text-to-speech
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from docx import Document  # For Word documents
 
 # Check for GPU availability
 device = 0 if torch.cuda.is_available() else -1
@@ -29,7 +33,7 @@ keyword_extractor = KeyBERT()
 if "summary_history" not in st.session_state:
     st.session_state.summary_history = []
 
-# Function to summarize text with progress indicator
+# Function to summarize text
 def summarize_text(text, max_length, min_length):
     if len(text.split()) < min_length:
         return "Input text is too short to summarize."
@@ -41,15 +45,40 @@ def summarize_text(text, max_length, min_length):
     st.session_state.summary_history.append(summary[0]["summary_text"])
     return summary[0]["summary_text"]
 
-# Function to generate shareable summary links
-def generate_share_links(summary):
-    encoded_summary = urllib.parse.quote(summary)
-    return {
-        "📧 Email": f"mailto:?subject=Summary&body={encoded_summary}",
-        "📱 WhatsApp": f"https://wa.me/?text={encoded_summary}",
-        "🐦 Twitter": f"https://twitter.com/intent/tweet?text={encoded_summary}",
-        "🔗 LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
-    }
+# Function to generate PDFs
+def generate_pdf(summary):
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(100, 750, "Summary:")
+    text_lines = summary.split("\n")
+
+    y_position = 730
+    for line in text_lines:
+        pdf.drawString(100, y_position, line)
+        y_position -= 20
+
+    pdf.save()
+    buffer.seek(0)
+    return buffer
+
+# Function to generate Word document
+def generate_word(summary):
+    buffer = BytesIO()
+    doc = Document()
+    doc.add_heading("Summary", level=1)
+    doc.add_paragraph(summary)
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+# Function to generate audio (MP3)
+def generate_audio(summary):
+    buffer = BytesIO()
+    tts = gTTS(text=summary, lang="en")
+    tts.save(buffer)
+    buffer.seek(0)
+    return buffer
 
 # Streamlit App Header
 st.markdown(
@@ -103,6 +132,46 @@ if option == "Single File":
             # Keywords Extraction
             keywords = keyword_extractor.extract_keywords(summary, top_n=5)
             st.write("🔑 **Keywords:**", ", ".join([word for word, _ in keywords]))
+
+            # **Download Options**
+            st.markdown("### 📥 Download Summary:")
+            col1, col2, col3, col4 = st.columns(4)
+
+            # Download as Text
+            text_buffer = BytesIO(summary.encode('utf-8'))
+            col1.download_button(
+                label="📄 TXT",
+                data=text_buffer,
+                file_name="summary.txt",
+                mime="text/plain"
+            )
+
+            # Download as PDF
+            pdf_buffer = generate_pdf(summary)
+            col2.download_button(
+                label="📑 PDF",
+                data=pdf_buffer,
+                file_name="summary.pdf",
+                mime="application/pdf"
+            )
+
+            # Download as Word
+            word_buffer = generate_word(summary)
+            col3.download_button(
+                label="📝 Word",
+                data=word_buffer,
+                file_name="summary.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+
+            # Download as MP3
+            audio_buffer = generate_audio(summary)
+            col4.download_button(
+                label="🔊 Audio",
+                data=audio_buffer,
+                file_name="summary.mp3",
+                mime="audio/mpeg"
+            )
 
             # Share Summary
             st.markdown("### 📢 Share Summary:")

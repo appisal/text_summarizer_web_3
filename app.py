@@ -132,13 +132,13 @@ if option == "Single File":
             st.markdown("### 📢 Share Summary:")
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.markdown(f'<a href="{email_link}" target="_blank">📧 Email</a>', unsafe_allow_html=True)
+                st.markdown(f'<a href="{email_link}" target="_blank">📧 **Email**</a>', unsafe_allow_html=True)
             with col2:
-                st.markdown(f'<a href="{whatsapp_link}" target="_blank">📱 WhatsApp</a>', unsafe_allow_html=True)
+                st.markdown(f'<a href="{whatsapp_link}" target="_blank">📱 **WhatsApp**</a>', unsafe_allow_html=True)
             with col3:
-                st.markdown(f'<a href="{twitter_link}" target="_blank">🐦 Twitter</a>', unsafe_allow_html=True)
+                st.markdown(f'<a href="{twitter_link}" target="_blank">🐦 **Twitter**</a>', unsafe_allow_html=True)
             with col4:
-                st.markdown(f'<a href="{linkedin_link}" target="_blank">🔗 LinkedIn</a>', unsafe_allow_html=True)
+                st.markdown(f'<a href="{linkedin_link}" target="_blank">🔗 **LinkedIn**</a>', unsafe_allow_html=True)
 
 # Summary History
 elif option == "Summary History":
@@ -151,4 +151,4 @@ elif option == "Summary History":
         st.write("🔍 No previous summaries found.")
 
 # Footer
-st.markdown("<br><hr><p style='text-align: center;'>© 2025 Text Summarizer AI | Built with ❤️ by AI</p>", unsafe_allow_html=True)
+st.markdown("<br><hr><p style='text-align: center;'>© 2025 Text Summarizer AI </p>", unsafe_allow_html=True)

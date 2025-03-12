@@ -17,30 +17,58 @@ device = 0 if torch.cuda.is_available() else -1
 
 
 # Custom CSS to style the navbar
+import streamlit as st
+
+# Custom CSS for Theme
 st.markdown("""
     <style>
         /* Global Styling */
         body {
             font-family: 'Poppins', sans-serif;
-            background: #eef1f6;
+            background: linear-gradient(120deg, #ff7eb3, #ff758c, #fad0c4);
+            background-size: cover;
             color: #333;
         }
-        /* Smooth Fade-in Animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        /* Full-Screen Background Image */
+        .main {
+            background: url('https://source.unsplash.com/1600x900/?abstract,technology') no-repeat center center fixed;
+            background-size: cover;
         }
-        
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255, 118, 136, 0.8);
+            padding: 15px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 15px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         /* Glossy Glassmorphism Card */
         .glass-card {
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-            animation: fadeIn 1s ease-in-out;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
         }
-        
+
         /* Premium Gradient Buttons */
         .stButton > button {
             transition: all 0.3s ease-in-out;
@@ -52,23 +80,12 @@ st.markdown("""
             border: none;
             box-shadow: 0px 4px 12px rgba(255, 118, 136, 0.3);
         }
+        
         .stButton > button:hover {
             background: linear-gradient(135deg, #ff758c, #ff7eb3);
-            transform: scale(1.07);
+            transform: scale(1.05);
         }
-        
-        /* Input Field Styling */
-        .stTextArea, .stFileUploader {
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
-            border: 1px solid rgba(255, 118, 136, 0.4);
-        }
-        .stTextArea:hover, .stFileUploader:hover {
-            box-shadow: 0px 7px 18px rgba(0, 0, 0, 0.2);
-        }
-        
+
         /* Premium Header Styling */
         .title-container {
             text-align: center;
@@ -81,86 +98,38 @@ st.markdown("""
             padding: 12px;
             text-shadow: 2px 4px 10px rgba(255, 118, 136, 0.4);
         }
-
-        /* Professional Navigation Bar */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(135deg, #ff7eb3, #ff758c);
-            padding: 15px 20px;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Navbar Left (Logo) */
-        .navbar .logo {
-            font-size: 22px;
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-        }
-
-        /* Navbar Links */
-        .navbar .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 20px;
-            margin-right: 20px;
-        }
-
-        .navbar .nav-links li {
-            display: inline;
-        }
-
-        .navbar .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-
-        .navbar .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Adjust main content to avoid overlap with navbar */
-        .content {
-            margin-top: 80px;
-        }
         
-        /* Dark Mode */
-        .dark-mode body {
-            background: #1e1e1e;
-            color: white;
-        }
     </style>
 """, unsafe_allow_html=True)
 
-# Add Navigation Bar
+# Render the navbar
 st.markdown("""
     <div class="navbar">
-        <a href="#" class="logo">🚀 Premium Summarizer</a>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
+        <a href="#home">🏠 Home</a>
+        <a href="#features">⚡ Features</a>
+        <a href="#about">ℹ️ About</a>
+        <a href="#contact">📩 Contact</a>
     </div>
 """, unsafe_allow_html=True)
 
-# Add Title and Padding to Avoid Navbar Overlap
-st.markdown("<div class='content'></div>", unsafe_allow_html=True)
+# Add some spacing so content isn't hidden by the navbar
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+# Title
 st.markdown("<div class='title-container'>🚀 Premium Text Summarizer</div>", unsafe_allow_html=True)
+
+# Glassmorphism Container for Content
+st.markdown("<div class='glass-card'><h3>🔍 Upload your file or paste text below</h3></div>", unsafe_allow_html=True)
+
+# File Uploader
+uploaded_file = st.file_uploader("Choose a file", type=["txt"])
+
+# Text Input Area
+st.text_area("Paste your text here:")
+
+# Summarize Button
+if st.button("🔍 Summarize"):
+    st.success("✅ Summary Generated!")
 
 
 

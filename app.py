@@ -14,92 +14,59 @@ from docx import Document
 
 # GPU Check
 device = 0 if torch.cuda.is_available() else -1
-# Stylish Animated Title
-# Apply global CSS animations and styles
-# Enhanced Premium UI Styling
-import streamlit as st
 
+
+# Custom CSS to style the navbar
 st.markdown("""
     <style>
-        /* Remove Streamlit default padding/margin */
+        /* Remove default Streamlit padding/margin */
         .block-container {
             padding-top: 0 !important;
         }
-        
-        /* Professional Navigation Bar */
+
+        /* Navigation Bar */
         .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
             background: linear-gradient(135deg, #ff7eb3, #ff758c);
-            padding: 10px 20px;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        /* Navbar Left (Logo) */
-        .navbar .logo {
-            font-size: 22px;
+        /* Navigation Links */
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
             font-weight: bold;
-            color: white;
-            text-decoration: none;
-        }
-
-        /* Navbar Links */
-        .navbar .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 20px;
-            margin: 0;
-            padding: 0;
-        }
-
-        .navbar .nav-links li {
-            display: inline;
-        }
-
-        .navbar .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
+            margin: 0 15px;
             padding: 8px 12px;
             border-radius: 5px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease-in-out;
         }
 
-        .navbar .nav-links a:hover {
+        .navbar a:hover {
             background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Adjust main content to avoid overlap with navbar */
-        .content {
-            margin-top: 80px;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Add Navigation Bar
+# Render the navbar using HTML
 st.markdown("""
     <div class="navbar">
-        <a href="#" class="logo">🚀 Premium Summarizer</a>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
+        <a href="#home">🏠 Home</a>
+        <a href="#features">⚡ Features</a>
+        <a href="#about">ℹ️ About</a>
+        <a href="#contact">📩 Contact</a>
     </div>
 """, unsafe_allow_html=True)
 
-# Ensure space below navbar
-st.markdown("<div class='content'></div>", unsafe_allow_html=True)
-st.markdown("<h1 style='text-align: center; margin-top: 30px;'>🚀 Premium Text Summarizer</h1>", unsafe_allow_html=True)
+# Add some spacing so content isn't hidden by the navbar
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+# Title after navbar
+st.markdown("<h1 style='text-align: center;'>🚀 Premium Text Summarizer</h1>", unsafe_allow_html=True)
+
 
 
 

@@ -17,79 +17,24 @@ device = 0 if torch.cuda.is_available() else -1
 # Stylish Animated Title
 # Apply global CSS animations and styles
 # Enhanced Premium UI Styling
+import streamlit as st
+
 st.markdown("""
     <style>
-        /* Global Styling */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #eef1f6;
-            color: #333;
-        }
-        /* Smooth Fade-in Animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Remove Streamlit default padding/margin */
+        .block-container {
+            padding-top: 0 !important;
         }
         
-        /* Glossy Glassmorphism Card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(12px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-            animation: fadeIn 1s ease-in-out;
-        }
-        
-        /* Premium Gradient Buttons */
-        .stButton > button {
-            transition: all 0.3s ease-in-out;
-            border-radius: 12px !important;
-            background: linear-gradient(135deg, #ff7eb3, #ff758c);
-            color: white !important;
-            font-weight: bold;
-            padding: 14px;
-            border: none;
-            box-shadow: 0px 4px 12px rgba(255, 118, 136, 0.3);
-        }
-        .stButton > button:hover {
-            background: linear-gradient(135deg, #ff758c, #ff7eb3);
-            transform: scale(1.07);
-        }
-        
-        /* Input Field Styling */
-        .stTextArea, .stFileUploader {
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
-            border: 1px solid rgba(255, 118, 136, 0.4);
-        }
-        .stTextArea:hover, .stFileUploader:hover {
-            box-shadow: 0px 7px 18px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Premium Header Styling */
-        .title-container {
-            text-align: center;
-            animation: fadeIn 1.5s ease-in-out;
-            font-size: 3rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #ff7eb3, #ff758c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            padding: 12px;
-            text-shadow: 2px 4px 10px rgba(255, 118, 136, 0.4);
-        }
-
         /* Professional Navigation Bar */
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
+            height: 60px;
             background: linear-gradient(135deg, #ff7eb3, #ff758c);
-            padding: 15px 20px;
+            padding: 10px 20px;
             z-index: 1000;
             display: flex;
             justify-content: space-between;
@@ -103,7 +48,6 @@ st.markdown("""
             font-weight: bold;
             color: white;
             text-decoration: none;
-            margin-left: 20px;
         }
 
         /* Navbar Links */
@@ -111,7 +55,8 @@ st.markdown("""
             list-style: none;
             display: flex;
             gap: 20px;
-            margin-right: 20px;
+            margin: 0;
+            padding: 0;
         }
 
         .navbar .nav-links li {
@@ -136,12 +81,6 @@ st.markdown("""
         .content {
             margin-top: 80px;
         }
-        
-        /* Dark Mode */
-        .dark-mode body {
-            background: #1e1e1e;
-            color: white;
-        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -158,9 +97,10 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Add Title and Padding to Avoid Navbar Overlap
+# Ensure space below navbar
 st.markdown("<div class='content'></div>", unsafe_allow_html=True)
-st.markdown("<div class='title-container'>🚀 Premium Text Summarizer</div>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; margin-top: 30px;'>🚀 Premium Text Summarizer</h1>", unsafe_allow_html=True)
+
 
 
 

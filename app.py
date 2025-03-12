@@ -205,7 +205,7 @@ if dark_mode:
     st.markdown("<style>body { background-color: #1E1E1E; color: white; }</style>", unsafe_allow_html=True)
 
 # Sidebar with Logo
-st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg", width=100)  
+#st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg", width=100)  
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "Summary History"])
 

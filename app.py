@@ -25,13 +25,12 @@ st.markdown("""
             background: #eef1f6;
             color: #333;
         }
-
         /* Smooth Fade-in Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
         /* Glossy Glassmorphism Card */
         .glass-card {
             background: rgba(255, 255, 255, 0.3);
@@ -41,7 +40,7 @@ st.markdown("""
             box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
             animation: fadeIn 1s ease-in-out;
         }
-
+        
         /* Premium Gradient Buttons */
         .stButton > button {
             transition: all 0.3s ease-in-out;
@@ -57,7 +56,7 @@ st.markdown("""
             background: linear-gradient(135deg, #ff758c, #ff7eb3);
             transform: scale(1.07);
         }
-
+        
         /* Input Field Styling */
         .stTextArea, .stFileUploader {
             border-radius: 12px;
@@ -69,7 +68,7 @@ st.markdown("""
         .stTextArea:hover, .stFileUploader:hover {
             box-shadow: 0px 7px 18px rgba(0, 0, 0, 0.2);
         }
-
+        
         /* Premium Header Styling */
         .title-container {
             text-align: center;
@@ -90,7 +89,7 @@ st.markdown("""
             left: 0;
             width: 100%;
             background: linear-gradient(135deg, #ff7eb3, #ff758c);
-            padding: 12px 20px;
+            padding: 15px 20px;
             z-index: 1000;
             display: flex;
             justify-content: space-between;
@@ -111,7 +110,7 @@ st.markdown("""
         .navbar .nav-links {
             list-style: none;
             display: flex;
-            gap: 25px;
+            gap: 20px;
             margin-right: 20px;
         }
 
@@ -135,15 +134,14 @@ st.markdown("""
 
         /* Adjust main content to avoid overlap with navbar */
         .content {
-            margin-top: 60px;
+            margin-top: 80px;
         }
-
+        
         /* Dark Mode */
         .dark-mode body {
             background: #1e1e1e;
             color: white;
         }
-
     </style>
 """, unsafe_allow_html=True)
 
@@ -160,11 +158,10 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Add Title with Glossy Effect
-st.markdown("<div class='title-container'>Text Summarizer</div>", unsafe_allow_html=True)
-
-# Add Padding to Avoid Navbar Overlap
+# Add Title and Padding to Avoid Navbar Overlap
 st.markdown("<div class='content'></div>", unsafe_allow_html=True)
+st.markdown("<div class='title-container'>🚀 Premium Text Summarizer</div>", unsafe_allow_html=True)
+
 
 
 # Load models

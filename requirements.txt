@@ -11,3 +11,5 @@ python-docx
 beautifulsoup4
 requests
 urllib3
+scipy  # Required by some NLP models
+sentencepiece  # Required for some Transformers models

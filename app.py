@@ -16,59 +16,34 @@ from docx import Document
 device = 0 if torch.cuda.is_available() else -1
 
 
-# Custom CSS to style the navbar
 import streamlit as st
 
-# Custom CSS for Theme
+# Custom CSS (Existing + New Navbar)
 st.markdown("""
     <style>
         /* Global Styling */
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(120deg, #ff7eb3, #ff758c, #fad0c4);
-            background-size: cover;
+            background: #eef1f6;
             color: #333;
         }
-
-        /* Full-Screen Background Image */
-        .main {
-            background: url('https://source.unsplash.com/1600x900/?abstract,technology') no-repeat center center fixed;
-            background-size: cover;
+        
+        /* Smooth Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Navigation Bar */
-        .navbar {
-            background: rgba(255, 118, 136, 0.8);
-            padding: 15px;
-            text-align: center;
-            border-radius: 12px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0 15px;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: background 0.3s ease-in-out;
-        }
-
-        .navbar a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
+        
         /* Glossy Glassmorphism Card */
         .glass-card {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 1s ease-in-out;
         }
-
+        
         /* Premium Gradient Buttons */
         .stButton > button {
             transition: all 0.3s ease-in-out;
@@ -80,12 +55,23 @@ st.markdown("""
             border: none;
             box-shadow: 0px 4px 12px rgba(255, 118, 136, 0.3);
         }
-        
         .stButton > button:hover {
             background: linear-gradient(135deg, #ff758c, #ff7eb3);
-            transform: scale(1.05);
+            transform: scale(1.07);
         }
-
+        
+        /* Input Field Styling */
+        .stTextArea, .stFileUploader {
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            border: 1px solid rgba(255, 118, 136, 0.4);
+        }
+        .stTextArea:hover, .stFileUploader:hover {
+            box-shadow: 0px 7px 18px rgba(0, 0, 0, 0.2);
+        }
+        
         /* Premium Header Styling */
         .title-container {
             text-align: center;
@@ -99,6 +85,38 @@ st.markdown("""
             text-shadow: 2px 4px 10px rgba(255, 118, 136, 0.4);
         }
         
+        /* Dark Mode */
+        .dark-mode body {
+            background: #1e1e1e;
+            color: white;
+        }
+
+        /* --- NEW NAVBAR --- */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            background: #ff7eb3;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar a:hover {
+            color: #ffebf0;
+            transform: scale(1.05);
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -112,24 +130,8 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Add some spacing so content isn't hidden by the navbar
-st.markdown("<br><br>", unsafe_allow_html=True)
-
 # Title
 st.markdown("<div class='title-container'>🚀 Premium Text Summarizer</div>", unsafe_allow_html=True)
-
-# Glassmorphism Container for Content
-st.markdown("<div class='glass-card'><h3>🔍 Upload your file or paste text below</h3></div>", unsafe_allow_html=True)
-
-# File Uploader
-uploaded_file = st.file_uploader("Choose a file", type=["txt"])
-
-# Text Input Area
-st.text_area("Paste your text here:")
-
-# Summarize Button
-if st.button("🔍 Summarize"):
-    st.success("✅ Summary Generated!")
 
 
 

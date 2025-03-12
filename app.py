@@ -97,7 +97,7 @@ st.markdown("""
 
     </style>
     
-    <div class="title-container">🚀 AI-Powered Text Summarizer</div>
+    <div class="title-container">🚀Text Summarizer</div>
 """, unsafe_allow_html=True)
 
 
@@ -260,4 +260,4 @@ elif option == "Summary History":
                 st.write(summary)
                 create_share_buttons(summary)
 
-st.markdown("<hr><p style='text-align: center;'>© 2025 Text Summarizer AI | Built with ❤️ using Streamlit</p>", unsafe_allow_html=True)
+st.markdown("<hr><p style='text-align: center;'> Text Summarizer</p>", unsafe_allow_html=True)

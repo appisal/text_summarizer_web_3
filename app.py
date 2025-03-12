@@ -23,81 +23,74 @@ st.markdown("""
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Animated Title */
+
+        /* Title Styling */
         .title-container {
             text-align: center;
             animation: fadeIn 1.5s ease-in-out;
             font-size: 2.5rem;
             font-weight: bold;
-            background: linear-gradient(45deg, #ff416c, #ff4b2b, #ff7f50);
+            background: linear-gradient(90deg, #0F2027, #203A43, #2C5364);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             padding: 10px;
         }
 
-        /* Sidebar Animation */
+        /* Sidebar Styling */
         .sidebar-title {
-            animation: fadeIn 1s ease-in-out;
             font-size: 1.5rem;
             font-weight: bold;
-            color: #ff4b4b;
+            color: #203A43;
             text-align: center;
         }
 
-        /* Section Headers */
-        .section-header {
-            animation: fadeIn 1.2s ease-in-out;
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #333;
-        }
-
-        /* Buttons Hover Effect */
+        /* Button Enhancements */
         .stButton > button {
             transition: all 0.3s ease-in-out;
-            border-radius: 10px !important;
-            background: linear-gradient(135deg, #ff4b2b, #ff7f50);
-            color: white !important;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #203A43, #2C5364);
+            color: white;
             font-weight: bold;
             padding: 10px;
+            border: none;
         }
         .stButton > button:hover {
-            background: linear-gradient(135deg, #ff7f50, #ff416c);
+            background: linear-gradient(135deg, #2C5364, #203A43);
             transform: scale(1.05);
         }
 
+        /* Input Fields */
+        .stTextArea, .stFileUploader {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
         /* Share Buttons */
         .share-btns {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin-top: 20px;
-            animation: fadeIn 1.3s ease-in-out;
         }
         .share-btns a img {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             transition: transform 0.3s ease-in-out;
         }
         .share-btns a img:hover {
-            transform: scale(1.2);
+            transform: scale(1.1);
         }
 
-        /* Smooth Box Shadows */
-        .stTextArea, .stFileUploader {
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
-            border-radius: 10px;
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #121212 !important;
+            color: white !important;
         }
-        .stTextArea:hover, .stFileUploader:hover {
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
-        }
-
     </style>
-    
-    <div class="title-container">🚀Text Summarizer</div>
+
+    <div class="title-container">🚀 Professional Text Summarizer</div>
 """, unsafe_allow_html=True)
 
 

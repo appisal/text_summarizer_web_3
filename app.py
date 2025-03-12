@@ -25,12 +25,13 @@ st.markdown("""
             background: #eef1f6;
             color: #333;
         }
+
         /* Smooth Fade-in Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         /* Glossy Glassmorphism Card */
         .glass-card {
             background: rgba(255, 255, 255, 0.3);
@@ -40,7 +41,7 @@ st.markdown("""
             box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
             animation: fadeIn 1s ease-in-out;
         }
-        
+
         /* Premium Gradient Buttons */
         .stButton > button {
             transition: all 0.3s ease-in-out;
@@ -56,7 +57,7 @@ st.markdown("""
             background: linear-gradient(135deg, #ff758c, #ff7eb3);
             transform: scale(1.07);
         }
-        
+
         /* Input Field Styling */
         .stTextArea, .stFileUploader {
             border-radius: 12px;
@@ -68,7 +69,7 @@ st.markdown("""
         .stTextArea:hover, .stFileUploader:hover {
             box-shadow: 0px 7px 18px rgba(0, 0, 0, 0.2);
         }
-        
+
         /* Premium Header Styling */
         .title-container {
             text-align: center;
@@ -81,16 +82,89 @@ st.markdown("""
             padding: 12px;
             text-shadow: 2px 4px 10px rgba(255, 118, 136, 0.4);
         }
-        
+
+        /* Professional Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            padding: 12px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Navbar Left (Logo) */
+        .navbar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        /* Navbar Links */
+        .navbar .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+            margin-right: 20px;
+        }
+
+        .navbar .nav-links li {
+            display: inline;
+        }
+
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .navbar .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Adjust main content to avoid overlap with navbar */
+        .content {
+            margin-top: 60px;
+        }
+
         /* Dark Mode */
         .dark-mode body {
             background: #1e1e1e;
             color: white;
         }
+
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='title-container'>🚀 Premium Text Summarizer</div>", unsafe_allow_html=True)
+# Add Navigation Bar
+st.markdown("""
+    <div class="navbar">
+        <a href="#" class="logo">🚀 Premium Summarizer</a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </div>
+""", unsafe_allow_html=True)
+
+# Add Title with Glossy Effect
+st.markdown("<div class='title-container'>Text Summarizer</div>", unsafe_allow_html=True)
+
+# Add Padding to Avoid Navbar Overlap
+st.markdown("<div class='content'></div>", unsafe_allow_html=True)
 
 
 # Load models

@@ -16,82 +16,81 @@ from docx import Document
 device = 0 if torch.cuda.is_available() else -1
 # Stylish Animated Title
 # Apply global CSS animations and styles
+# Enhanced Premium UI Styling
 st.markdown("""
     <style>
+        /* Global Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #eef1f6;
+            color: #333;
+        }
         /* Smooth Fade-in Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Title Styling */
+        
+        /* Glossy Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        /* Premium Gradient Buttons */
+        .stButton > button {
+            transition: all 0.3s ease-in-out;
+            border-radius: 12px !important;
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            color: white !important;
+            font-weight: bold;
+            padding: 14px;
+            border: none;
+            box-shadow: 0px 4px 12px rgba(255, 118, 136, 0.3);
+        }
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            transform: scale(1.07);
+        }
+        
+        /* Input Field Styling */
+        .stTextArea, .stFileUploader {
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            border: 1px solid rgba(255, 118, 136, 0.4);
+        }
+        .stTextArea:hover, .stFileUploader:hover {
+            box-shadow: 0px 7px 18px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Premium Header Styling */
         .title-container {
             text-align: center;
             animation: fadeIn 1.5s ease-in-out;
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
-            background: linear-gradient(90deg, #0F2027, #203A43, #2C5364);
+            background: linear-gradient(45deg, #ff7eb3, #ff758c);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            padding: 10px;
-        }
-
-        /* Sidebar Styling */
-        .sidebar-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #203A43;
-            text-align: center;
-        }
-
-        /* Button Enhancements */
-        .stButton > button {
-            transition: all 0.3s ease-in-out;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #203A43, #2C5364);
-            color: white;
-            font-weight: bold;
-            padding: 10px;
-            border: none;
-        }
-        .stButton > button:hover {
-            background: linear-gradient(135deg, #2C5364, #203A43);
-            transform: scale(1.05);
-        }
-
-        /* Input Fields */
-        .stTextArea, .stFileUploader {
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+            padding: 12px;
+            text-shadow: 2px 4px 10px rgba(255, 118, 136, 0.4);
         }
         
-        /* Share Buttons */
-        .share-btns {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .share-btns a img {
-            width: 40px;
-            height: 40px;
-            transition: transform 0.3s ease-in-out;
-        }
-        .share-btns a img:hover {
-            transform: scale(1.1);
-        }
-
         /* Dark Mode */
-        body.dark-mode {
-            background-color: #121212 !important;
-            color: white !important;
+        .dark-mode body {
+            background: #1e1e1e;
+            color: white;
         }
     </style>
-
-    <div class="title-container">🚀 Professional Text Summarizer</div>
 """, unsafe_allow_html=True)
+
+st.markdown("<div class='title-container'>🚀 Premium Text Summarizer</div>", unsafe_allow_html=True)
 
 
 # Load models

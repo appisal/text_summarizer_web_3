@@ -15,40 +15,80 @@ from docx import Document
 # GPU Check
 device = 0 if torch.cuda.is_available() else -1
 
-# Custom CSS (Navbar + Sidebar Styling)
 st.markdown("""
     <style>
-        .navbar {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            background: #ff7eb3;
-            padding: 15px;
+        /* Global Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #eef1f6;
+            color: #333;
+        }
+        /* Smooth Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Glossy Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 1s ease-in-out;
         }
-        .navbar a {
-            text-decoration: none;
-            font-size: 18px;
+        
+        /* Premium Gradient Buttons */
+        .stButton > button {
+            transition: all 0.3s ease-in-out;
+            border-radius: 12px !important;
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            color: white !important;
             font-weight: bold;
-            color: white;
-            cursor: pointer;
+            padding: 14px;
+            border: none;
+            box-shadow: 0px 4px 12px rgba(255, 118, 136, 0.3);
         }
-        .navbar a:hover {
-            color: #ffebf0;
-            transform: scale(1.05);
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            transform: scale(1.07);
+        }
+        
+        /* Input Field Styling */
+        .stTextArea, .stFileUploader {
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            border: 1px solid rgba(255, 118, 136, 0.4);
+        }
+        .stTextArea:hover, .stFileUploader:hover {
+            box-shadow: 0px 7px 18px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Premium Header Styling */
+        .title-container {
+            text-align: center;
+            animation: fadeIn 1.5s ease-in-out;
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff7eb3, #ff758c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding: 12px;
+            text-shadow: 2px 4px 10px rgba(255, 118, 136, 0.4);
+        }
+        
+        /* Dark Mode */
+        .dark-mode body {
+            background: #1e1e1e;
+            color: white;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Render the Navbar
-st.markdown("""
-    <div class="navbar">
-        <a onclick="window.location.href='#features'">⚡ Features</a>
-    </div>
-""", unsafe_allow_html=True)
-
+st.markdown("<div class='title-container'>🚀 Premium Text Summarizer</div>", unsafe_allow_html=True)
 # Sidebar
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "Summary History"])

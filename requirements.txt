@@ -1,15 +1,6 @@
 streamlit
 transformers
 torch
-wordcloud
-matplotlib
-seaborn
-keybert
-gtts
-reportlab
+googletrans==4.0.0-rc1
+pdfplumber
 python-docx
-beautifulsoup4
-requests
-urllib3
-scipy  # Required by some NLP models
-sentencepiece  # Required for some Transformers models

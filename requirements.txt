@@ -12,3 +12,5 @@ PyMuPDF
 pdfplumber
 urllib3
 langdetect
+googletrans==4.0.0-rc1
+

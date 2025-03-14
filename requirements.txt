@@ -1,6 +1,13 @@
 streamlit
 transformers
 torch
-googletrans==4.0.0-rc1
-pdfplumber
+gtts
+wordcloud
+matplotlib
+seaborn
+keybert
+reportlab
 python-docx
+PyMuPDF
+pdfplumber
+urllib3

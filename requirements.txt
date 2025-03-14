@@ -11,3 +11,4 @@ python-docx
 PyMuPDF
 pdfplumber
 urllib3
+langdetect

@@ -15,6 +15,10 @@ from googletrans import Translator
 import pdfplumber
 from langdetect import detect
 from docx import Document
+from deep_translator import GoogleTranslator
+
+
+
 
 # GPU Check
 device = 0 if torch.cuda.is_available() else -1
@@ -42,16 +46,18 @@ def detect_language(text):
     return detect(text)
 
 # Multi-Language Summarization
+translator = GoogleTranslator(source="auto", target="en")
+
 def summarize_multilang_text(text, max_length, min_length):
     lang = detect_language(text)
     if lang != "en":
-        text = translator.translate(text, src=lang, dest="en").text
+        text = translator.translate(text)
     summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)[0]["summary_text"]
     if lang != "en":
-        summary = translator.translate(summary, src="en", dest=lang).text
+        summary = GoogleTranslator(source="en", target=lang).translate(summary)
     st.session_state.summary_history.append(summary)
     return summary
-
+    
 # PDF & DOCX Upload Support
 def extract_text_from_pdf(uploaded_file):
     with pdfplumber.open(uploaded_file) as pdf:

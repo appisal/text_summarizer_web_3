@@ -13,7 +13,6 @@ from docx import Document
 import pdfplumber
 from langdetect import detect
 from googletrans import Translator
-import time
 
 # GPU Check
 device = 0 if torch.cuda.is_available() else -1
@@ -70,6 +69,23 @@ def download_pdf(summary):
     buffer.seek(0)
     return buffer
 
+# Function to download summary as Word
+def download_word(summary):
+    doc = Document()
+    doc.add_paragraph(summary)
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+# Function to download summary as audio
+def download_audio(summary):
+    tts = gTTS(summary, lang="en")
+    buffer = BytesIO()
+    tts.write_to_fp(buffer)
+    buffer.seek(0)
+    return buffer
+
 # Function to generate sharing links
 def generate_share_links(summary):
     encoded_summary = urllib.parse.quote(summary)
@@ -80,7 +96,7 @@ def generate_share_links(summary):
         "LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
     }
 
-# Function to create animated share buttons
+# Function to create share buttons with icons
 def create_share_buttons(summary):
     share_links = generate_share_links(summary)
     share_html = f"""
@@ -88,7 +104,7 @@ def create_share_buttons(summary):
         .share-btns {{
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
         }}
         .share-btns a img {{
@@ -97,7 +113,7 @@ def create_share_buttons(summary):
             transition: transform 0.3s ease-in-out;
         }}
         .share-btns a img:hover {{
-            transform: scale(1.2) rotate(10deg);
+            transform: scale(1.2);
         }}
     </style>
     <div class="share-btns">
@@ -117,43 +133,61 @@ def create_share_buttons(summary):
     """
     st.markdown(share_html, unsafe_allow_html=True)
 
-# UI Setup with Animation
-st.markdown("""
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        h1 {
-            text-align: center;
-            animation: fadeIn 1s ease-in-out;
-        }
-        .stButton>button {
-            transition: transform 0.3s ease-in-out;
-        }
-        .stButton>button:hover {
-            transform: scale(1.1);
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("<h1>🚀 AI-Powered Text Summarizer</h1>", unsafe_allow_html=True)
+# UI Setup
+st.markdown("<h1 style='text-align: center;'>🚀 AI-Powered Text Summarizer</h1>", unsafe_allow_html=True)
 
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "Summary History"])
 
 if option == "Single File":
-    st.markdown("<h3>📂 Upload a file to summarize.</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>📂 Upload a file or paste text to summarize.</h3>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Choose a file", type=["pdf", "docx"])
     text = ""
+
     if uploaded_file:
-        text = extract_text_from_pdf(uploaded_file) if uploaded_file.type == "application/pdf" else extract_text_from_docx(uploaded_file)
+        if uploaded_file.type == "application/pdf":
+            text = extract_text_from_pdf(uploaded_file)
+        elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            text = extract_text_from_docx(uploaded_file)
+    else:
+        text = st.text_area("✍️ Paste your text here:", height=200)
+
     if text.strip():
         max_length = st.slider("📏 Max summary length (words):", 50, 500, 200)
         min_length = st.slider("📏 Min summary length (words):", 10, 100, 50)
+
         if st.button("✨ Summarize", use_container_width=True):
             summary = summarize_multilang_text(text, max_length, min_length)
+            st.markdown("<h3>📌 Summary:</h3>", unsafe_allow_html=True)
             st.success(summary)
+
+            # Download Buttons
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.download_button("📄 PDF", download_pdf(summary), file_name="summary.pdf", mime="application/pdf")
+            with col2:
+                st.download_button("📝 Word", download_word(summary), file_name="summary.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            with col3:
+                st.download_button("🔊 Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
+
+            # Share Buttons
+            st.markdown("<h3 style='text-align: center;'>📢 Share this Summary</h3>", unsafe_allow_html=True)
+            create_share_buttons(summary)
+
+elif option == "Bulk File Processing":
+    uploaded_files = st.file_uploader("Upload multiple files", type=["pdf", "docx"], accept_multiple_files=True)
+    if uploaded_files:
+        for file in uploaded_files:
+            text = extract_text_from_pdf(file) if file.type == "application/pdf" else extract_text_from_docx(file)
+            summary = summarize_multilang_text(text, 200, 50)
+            st.markdown(f"### 📜 Summary for {file.name}")
+            st.success(summary)
+
+elif option == "Summary History":
+    st.subheader("📜 Summary History")
+    for i, summary in enumerate(reversed(st.session_state.summary_history)):
+        with st.expander(f"📄 Summary {len(st.session_state.summary_history) - i}"):
+            st.write(summary)
             create_share_buttons(summary)
 
 st.markdown("<hr><p style='text-align: center;'>🔗 AI-Powered Summarizer</p>", unsafe_allow_html=True)

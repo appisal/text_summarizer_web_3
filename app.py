@@ -136,8 +136,42 @@ def create_share_buttons(summary):
 # UI Setup
 st.markdown("<h1 style='text-align: center;'>🚀 AI-Powered Text Summarizer</h1>", unsafe_allow_html=True)
 
-st.sidebar.title("⚡ Features")
-option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "Summary History"])
+import streamlit as st
+
+# Navigation options
+st.sidebar.title("📌 Navigation")
+page = st.sidebar.radio("Go to", ["🏠 Home", "📂 Summarizer", "📜 Summary History"])
+
+# 🏠 Home Page
+if page == "🏠 Home":
+    st.markdown("<h1 style='text-align: center;'>🚀 Welcome to AI-Powered Summarizer</h1>", unsafe_allow_html=True)
+    st.image("https://source.unsplash.com/900x300/?technology,ai", use_column_width=True)
+    st.markdown("""
+    ### 🤖 About This Project
+    This AI-powered tool helps you **summarize text** from PDFs, Word files, and plain text.  
+    Features include:
+    - 🌎 Multi-language support  
+    - 🔍 Keyword extraction  
+    - 🎭 Sentiment analysis  
+    - 📤 Shareable summaries (WhatsApp, LinkedIn, Twitter)  
+    - 📥 Download as **PDF, Word, Audio**  
+
+    ### 🚀 Get Started  
+    1️⃣ Click on **Summarizer** in the sidebar to upload a file  
+    2️⃣ Adjust summary settings and generate your result  
+    3️⃣ Download, listen, or share your summary  
+    """)
+
+# 📂 Summarizer Page (Your existing summarization code)
+elif page == "📂 Summarizer":
+    st.markdown("<h1 style='text-align: center;'>📂 Upload & Summarize</h1>", unsafe_allow_html=True)
+    # 🔹 Include your existing summarization logic here
+
+# 📜 Summary History Page
+elif page == "📜 Summary History":
+    st.markdown("<h1 style='text-align: center;'>📜 Summary History</h1>", unsafe_allow_html=True)
+    # 🔹 Include your existing summary history code
+
 
 if option == "Single File":
     st.markdown("<h3>📂 Upload a file or paste text to summarize.</h3>", unsafe_allow_html=True)

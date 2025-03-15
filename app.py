@@ -7,12 +7,16 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import seaborn as sns
 from keybert import KeyBERT
+import time
 import urllib.parse  
 from reportlab.pdfgen import canvas
 from docx import Document
+from googletrans import Translator
 import pdfplumber
 from langdetect import detect
-from googletrans import Translator
+from docx import Document
+from PIL import Image
+import base64
 
 # GPU Check
 device = 0 if torch.cuda.is_available() else -1
@@ -59,120 +63,74 @@ def extract_text_from_docx(uploaded_file):
     doc = Document(uploaded_file)
     return "\n".join([para.text for para in doc.paragraphs])
 
-# Function to download summary as PDF
-def download_pdf(summary):
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer)
-    pdf.drawString(100, 750, "Summary Report")
-    pdf.drawString(100, 730, summary)
-    pdf.save()
-    buffer.seek(0)
-    return buffer
-
-# Function to download summary as Word
-def download_word(summary):
-    doc = Document()
-    doc.add_paragraph(summary)
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer
-
-# Function to download summary as audio
-def download_audio(summary):
-    tts = gTTS(summary, lang="en")
-    buffer = BytesIO()
-    tts.write_to_fp(buffer)
-    buffer.seek(0)
-    return buffer
-
-# Function to generate sharing links
-def generate_share_links(summary):
-    encoded_summary = urllib.parse.quote(summary)
-    return {
-        "WhatsApp": f"https://wa.me/?text={encoded_summary}",
-        "Twitter": f"https://twitter.com/intent/tweet?text={encoded_summary}",
-        "Email": f"mailto:?subject=Summary&body={encoded_summary}",
-        "LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
-    }
-
-# Function to create share buttons with icons
-def create_share_buttons(summary):
-    share_links = generate_share_links(summary)
-    share_html = f"""
-    <style>
-        .share-btns {{
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }}
-        .share-btns a img {{
-            width: 50px;
-            height: 50px;
-            transition: transform 0.3s ease-in-out;
-        }}
-        .share-btns a img:hover {{
-            transform: scale(1.2);
-        }}
-    </style>
-    <div class="share-btns">
-        <a href="{share_links['WhatsApp']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
-        </a>
-        <a href="{share_links['Twitter']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/en/6/60/Twitter_Logo_as_of_2021.svg">
-        </a>
-        <a href="{share_links['Email']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28iOS%29.svg">
-        </a>
-        <a href="{share_links['LinkedIn']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png">
-        </a>
-    </div>
-    """
-    st.markdown(share_html, unsafe_allow_html=True)
+# Function to create icon buttons
+def create_icon_button(icon_url, link, tooltip):
+    encoded_url = base64.b64encode(icon_url.getvalue()).decode()
+    html_code = f'<a href="{link}" target="_blank"><img src="data:image/png;base64,{encoded_url}" width="40" title="{tooltip}" style="margin: 5px; cursor: pointer;"></a>'
+    st.markdown(html_code, unsafe_allow_html=True)
 
 # UI Setup
-st.markdown("<h1 style='text-align: center;'>🚀 AI-Powered Text Summarizer</h1>", unsafe_allow_html=True)
-
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "Summary History"])
 
+st.markdown("<h2 style='text-align: center;'>📖 Text Summarization & Analysis</h2>", unsafe_allow_html=True)
+
 if option == "Single File":
-    st.markdown("<h3>📂 Upload a file or paste text to summarize.</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>📂 Upload a file to summarize.</h3>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Choose a file", type=["pdf", "docx"])
     text = ""
-
+    
     if uploaded_file:
         if uploaded_file.type == "application/pdf":
             text = extract_text_from_pdf(uploaded_file)
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             text = extract_text_from_docx(uploaded_file)
-    else:
-        text = st.text_area("✍️ Paste your text here:", height=200)
-
+    
     if text.strip():
         max_length = st.slider("📏 Max summary length (words):", 50, 500, 200)
         min_length = st.slider("📏 Min summary length (words):", 10, 100, 50)
-
+        
         if st.button("✨ Summarize", use_container_width=True):
             summary = summarize_multilang_text(text, max_length, min_length)
             st.markdown("<h3>📌 Summary:</h3>", unsafe_allow_html=True)
             st.success(summary)
+            
+            # Share Buttons - Icons as buttons
+            st.markdown("<h3 style='text-align: center;'>🔗 Share Summary</h3>", unsafe_allow_html=True)
+            
+            col1, col2, col3 = st.columns([1, 1, 1])
+            
+            with col1:
+                whatsapp_icon = open("whatsapp.png", "rb")
+                create_icon_button(whatsapp_icon, f"https://api.whatsapp.com/send?text={urllib.parse.quote(summary)}", "Share on WhatsApp")
+            with col2:
+                twitter_icon = open("twitter.png", "rb")
+                create_icon_button(twitter_icon, f"https://twitter.com/intent/tweet?text={urllib.parse.quote(summary)}", "Share on Twitter")
+            with col3:
+                linkedin_icon = open("linkedin.png", "rb")
+                create_icon_button(linkedin_icon, f"https://www.linkedin.com/sharing/share-offsite/?url={urllib.parse.quote(summary)}", "Share on LinkedIn")
 
             # Download Buttons
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.download_button("📄 PDF", download_pdf(summary), file_name="summary.pdf", mime="application/pdf")
-            with col2:
-                st.download_button("📝 Word", download_word(summary), file_name="summary.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-            with col3:
-                st.download_button("🔊 Audio", download_audio(summary), file_name="summary.mp3", mime="audio/mp3")
+            st.markdown("<h3 style='text-align: center;'>⬇️ Download Summary</h3>", unsafe_allow_html=True)
+            
+            col4, col5 = st.columns([1, 1])
+            
+            with col4:
+                if st.button("📄 Download as PDF", use_container_width=True):
+                    pdf_buffer = BytesIO()
+                    c = canvas.Canvas(pdf_buffer)
+                    c.drawString(100, 750, summary)
+                    c.save()
+                    st.download_button("Download PDF", pdf_buffer, file_name="summary.pdf", mime="application/pdf")
+            
+            with col5:
+                if st.button("🔊 Download as Audio", use_container_width=True):
+                    tts = gTTS(summary, lang='en')
+                    audio_buffer = BytesIO()
+                    tts.write_to_fp(audio_buffer)
+                    st.download_button("Download Audio", audio_buffer, file_name="summary.mp3", mime="audio/mpeg")
 
-            # Share Buttons
-            st.markdown("<h3 style='text-align: center;'>📢 Share this Summary</h3>", unsafe_allow_html=True)
-            create_share_buttons(summary)
+# Bulk Processing & History remain unchanged
 
 elif option == "Bulk File Processing":
     uploaded_files = st.file_uploader("Upload multiple files", type=["pdf", "docx"], accept_multiple_files=True)

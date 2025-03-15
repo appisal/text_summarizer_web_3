@@ -16,7 +16,7 @@ import pdfplumber
 from langdetect import detect
 from docx import Document
 from deep_translator import GoogleTranslator
-
+import time
 
 
 
@@ -48,15 +48,22 @@ def detect_language(text):
 # Multi-Language Summarization
 translator = GoogleTranslator(source="auto", target="en")
 
-def summarize_multilang_text(text, max_length, min_length):
-    lang = detect_language(text)
-    if lang != "en":
-        text = translator.translate(text)
-    summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)[0]["summary_text"]
-    if lang != "en":
-        summary = GoogleTranslator(source="en", target=lang).translate(summary)
-    st.session_state.summary_history.append(summary)
-    return summary
+
+def translate_text(text, src_lang, dest_lang="en"):
+    time.sleep(1)  # Adding a small delay
+    return GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
+
+
+from deep_translator import GoogleTranslator, exceptions
+
+def translate_text(text, src_lang, dest_lang="en"):
+    try:
+        return GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
+    except exceptions.RequestError:
+        return "Translation service is unavailable. Please try again later."
+    except Exception as e:
+        return f"Error: {e}"
+
     
 # PDF & DOCX Upload Support
 def extract_text_from_pdf(uploaded_file):

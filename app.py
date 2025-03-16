@@ -151,8 +151,9 @@ if option == "Single File":
             text = extract_text_from_docx(uploaded_file)
     else:
     # Initialize session state for text if not present
-    if "input_text" not in st.session_state:
-        st.session_state.input_text = ""
+        if "input_text" not in st.session_state:
+            st.session_state.input_text = ""
+        
 
     # Text Area with session state
     text = st.text_area("✍️ Paste your text here:", value=st.session_state.input_text, height=200, key="input_text")

@@ -149,12 +149,13 @@ if option == "Single File":
             text = extract_text_from_pdf(uploaded_file)
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             text = extract_text_from_docx(uploaded_file)
-    else:
-        text = st.text_area("✍️ Paste your text here:", height=200)
+   else:
+    text = st.text_area("✍️ Paste your text here:", height=200)
 
     # Add a Clear Text Button
     if st.button("❌ Clear Text"):
-        st.experimental_rerun()
+        st.rerun()
+
 
 
     if text.strip():

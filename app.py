@@ -173,7 +173,7 @@ elif page == "📜 Summary History":
     # 🔹 Include your existing summary history code
 
 
-if option == "Single File":
+if page == "📂 Summarizer":
     st.markdown("<h3>📂 Upload a file or paste text to summarize.</h3>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Choose a file", type=["pdf", "docx"])
     text = ""
@@ -208,7 +208,7 @@ if option == "Single File":
             st.markdown("<h3 style='text-align: center;'>📢 Share this Summary</h3>", unsafe_allow_html=True)
             create_share_buttons(summary)
 
-elif option == "Bulk File Processing":
+elif page == "📜 Summary History":
     uploaded_files = st.file_uploader("Upload multiple files", type=["pdf", "docx"], accept_multiple_files=True)
     if uploaded_files:
         for file in uploaded_files:

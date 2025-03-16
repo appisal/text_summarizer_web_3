@@ -150,7 +150,7 @@ if option == "Single File":
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             text = extract_text_from_docx(uploaded_file)
    else:
-    text = st.text_area("✍️ Paste your text here:", height=200)
+        text = st.text_area("✍️ Paste your text here:", height=200)
 
     # Add a Clear Text Button
     if st.button("❌ Clear Text"):

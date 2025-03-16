@@ -150,13 +150,17 @@ if option == "Single File":
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             text = extract_text_from_docx(uploaded_file)
     else:
-         text = st.text_area("✍️ Paste your text here:", height=200)
+    # Initialize session state for text if not present
+    if "input_text" not in st.session_state:
+        st.session_state.input_text = ""
 
-       
+    # Text Area with session state
+    text = st.text_area("✍️ Paste your text here:", value=st.session_state.input_text, height=200, key="input_text")
 
-    # Add a Clear Text Button
+    # Clear Text Button
     if st.button("❌ Clear Text"):
-        st.rerun()
+        st.session_state.input_text = ""  # Reset text
+        st.rerun()  # Refresh the app
 
 
 

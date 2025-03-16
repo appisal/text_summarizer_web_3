@@ -152,6 +152,11 @@ if option == "Single File":
     else:
         text = st.text_area("✍️ Paste your text here:", height=200)
 
+    # Add a Clear Text Button
+    if st.button("❌ Clear Text"):
+        st.experimental_rerun()
+
+
     if text.strip():
         max_length = st.slider("📏 Max summary length (words):", 50, 500, 200)
         min_length = st.slider("📏 Min summary length (words):", 10, 100, 50)

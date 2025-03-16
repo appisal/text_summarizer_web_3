@@ -208,7 +208,7 @@ if page == "📂 Summarizer":
             st.markdown("<h3 style='text-align: center;'>📢 Share this Summary</h3>", unsafe_allow_html=True)
             create_share_buttons(summary)
 
-elif page == "📜 Summary History":
+elif page == "Bulk File processing":
     uploaded_files = st.file_uploader("Upload multiple files", type=["pdf", "docx"], accept_multiple_files=True)
     if uploaded_files:
         for file in uploaded_files:

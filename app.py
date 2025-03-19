@@ -11,6 +11,7 @@ from gtts import gTTS
 import qrcode
 from PIL import Image
 from io import BytesIO
+import time
 st.markdown("""
     <style>
         /* Apply background to the whole page */
@@ -30,6 +31,35 @@ st.markdown("""
         h1 {
             color: #2c3e50;
             text-align: center;
+        }
+        
+        /* Typing animation for summary */
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        .summary-text {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid black;
+            animation: typing 2s steps(40, end) forwards;
+        }
+        
+        /* Fade-in effect for QR code */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .qr-container img {
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        /* Button effects */
+        .stButton>button {
+            transition: transform 0.2s ease-in-out;
+        }
+        .stButton>button:hover {
+            transform: scale(1.1);
         }
     </style>
 """, unsafe_allow_html=True)

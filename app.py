@@ -90,27 +90,22 @@ def generate_share_links(summary):
     }
 
 # Function to generate a QR code
-
-
-
-
 def generate_qr_code(data):
-        qr = qrcode.QRCode(
+    qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=5,  # Adjust size
+        box_size=5,
         border=2
     )
-    qr.add_data(data)
+    qr.add_data(data)  # Make sure this line is indented correctly
     qr.make(fit=True)
 
     img = qr.make_image(fill="black", back_color="white")
     
-    # Convert to BytesIO buffer for Streamlit
     qr_buffer = BytesIO()
     img.save(qr_buffer, format="PNG")
     qr_buffer.seek(0)
-    
+
     return qr_buffer
 
 

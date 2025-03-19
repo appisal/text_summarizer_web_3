@@ -8,6 +8,14 @@ from reportlab.pdfgen import canvas
 from docx import Document
 import pdfplumber
 from gtts import gTTS
+st.markdown("""
+    <style>
+        body {
+            background: linear-gradient(to bottom, #f8f9fa, #e3e7ed);
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 
 # Session state for history
 if "summary_history" not in st.session_state:

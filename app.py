@@ -99,7 +99,7 @@ def create_share_buttons(summary):
 # UI Setup
 st.markdown("""
     <div style="text-align: center;">
-        <img src="https://github.com/appisal/text_summarizer_web_3/blob/main/Screenshot_2025-03-19_144539-removebg-preview.png" alt="QuickText Logo" width="150">
+        <img src="file:///C:/Users/Aditya%20Pisal/Downloads/Screenshot_2025-03-19_144539-removebg-preview.png" alt="QuickText Logo" width="150">
         <h1>🚀 QuickText - Text Processor</h1>
     </div>
 """, unsafe_allow_html=True)

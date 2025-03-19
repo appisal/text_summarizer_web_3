@@ -99,10 +99,11 @@ def create_share_buttons(summary):
 # UI Setup
 st.markdown("""
     <div style="text-align: center;">
-        <img src="https://i.imgur.com/55eTSwu.png" alt="QuickText Logo" width="150">
-        <h1>🚀 QuickText - Text Processor</h1>
+        <img src="https://i.imgur.com/55eTSwu.png" alt="QuickText Logo" style="width: 120px; margin-bottom: -10px;">
+        <h1 style="margin-top: 5px;">🚀 QuickText - Text Processor</h1>
     </div>
 """, unsafe_allow_html=True)
+
 
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "History"])

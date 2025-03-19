@@ -10,6 +10,7 @@ import pdfplumber
 from gtts import gTTS
 import qrcode
 from PIL import Image
+from io import BytesIO
 st.markdown("""
     <style>
         /* Apply background to the whole page */
@@ -91,18 +92,26 @@ def generate_share_links(summary):
 # Function to generate a QR code
 
 
-def generate_qr(data):
+
+
+def generate_qr_code(data):
     qr = qrcode.QRCode(
-        version=1,  # Keeps the QR version small
+        version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=5,  # Reduce the box size to make QR smaller
-        border=2  # Reduce border thickness
+        box_size=5,  # Adjust size
+        border=2
     )
     qr.add_data(data)
     qr.make(fit=True)
+
+    img = qr.make_image(fill="black", back_color="white")
     
-    qr_img = qr.make_image(fill="black", back_color="white")
-    return qr_img
+    # Convert to BytesIO buffer for Streamlit
+    qr_buffer = BytesIO()
+    img.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
+    
+    return qr_buffer
 
 
 # Function to create share buttons with icons
@@ -155,11 +164,7 @@ def create_share_buttons(summary):
 
     st.markdown(share_html, unsafe_allow_html=True)
 
-    # Display QR code
-    st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
-    qr_buffer = generate_qr_code(summary)
-    st.image(image, use_container_width=True)
-
+   
    
   
 

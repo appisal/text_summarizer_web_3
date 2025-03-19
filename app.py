@@ -89,11 +89,21 @@ def generate_share_links(summary):
         "Telegram": f"https://t.me/share/url?url={encoded_summary}"
     }
 
-# Function to generate a QR code
+# Function to generate a QR code with smaller size
 def generate_qr_code(summary):
-    qr = qrcode.make(summary)
+    qr = qrcode.QRCode(
+        version=1,  # Controls the complexity (1 is smallest)
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=5,  # Reduce this for a smaller QR code
+        border=2     # Controls the white border (default is 4)
+    )
+    qr.add_data(summary)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill="black", back_color="white")
+
     buffer = BytesIO()
-    qr.save(buffer, format="PNG")
+    img.save(buffer, format="PNG")
     buffer.seek(0)
     return buffer
 
@@ -151,8 +161,6 @@ def create_share_buttons(summary):
     st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
     qr_buffer = generate_qr_code(summary)
     st.image(qr_buffer, caption="QR Code for Sharing", use_container_width=False)
-   
-
 
    
    

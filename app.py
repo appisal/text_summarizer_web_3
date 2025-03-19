@@ -95,7 +95,7 @@ def generate_share_links(summary):
 
 
 def generate_qr_code(data):
-    qr = qrcode.QRCode(
+        qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=5,  # Adjust size

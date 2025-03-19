@@ -150,7 +150,9 @@ def create_share_buttons(summary):
     # Display QR code
     st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
     qr_buffer = generate_qr_code(summary)
-    st.image(qr_buffer, caption="QR Code for Sharing", use_column_width=False)
+    st.image(qr_buffer, caption="QR Code for Sharing", use_container_width=False)
+   
+
 
    
    

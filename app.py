@@ -78,6 +78,7 @@ def download_audio(summary):
     return buffer
 
 # Function to generate sharing links
+
 def generate_share_links(summary):
     encoded_summary = urllib.parse.quote(summary)
     return {
@@ -92,10 +93,10 @@ def generate_share_links(summary):
 # Function to generate a QR code with smaller size
 def generate_qr_code(summary):
     qr = qrcode.QRCode(
-        version=1,  # Controls the complexity (1 is smallest)
+        version=1,  # Controls complexity (1 is smallest)
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=3,  # Reduce this for a smaller QR code
-        border=2     # Controls the white border (default is 4)
+        box_size=2,  # Smaller QR code
+        border=2     # Less white space
     )
     qr.add_data(summary)
     qr.make(fit=True)
@@ -157,11 +158,13 @@ def create_share_buttons(summary):
 
     st.markdown(share_html, unsafe_allow_html=True)
 
-    # Display QR code
-    st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
-    qr_buffer = generate_qr_code(summary)
-    st.image(qr_buffer, caption="QR Code for Sharing", use_container_width=False)
+    # Checkbox to toggle QR code display
+    show_qr = st.checkbox("Show QR Code for Sharing")
 
+    if show_qr:
+        st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
+        qr_buffer = generate_qr_code(summary)
+        st.image(qr_buffer, caption="QR Code for Sharing", use_container_width=False)
    
    
   

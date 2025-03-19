@@ -9,22 +9,29 @@ from docx import Document
 import pdfplumber
 from gtts import gTTS
 st.markdown("""
-    <style>
-        body {
-            background: linear-gradient(to bottom, #f8f9fa, #e3e7ed);
-        }
-    </style>
-""", unsafe_allow_html=True)
 st.markdown("""
     <style>
-        body {
-            background-color: #f5f7fa;
-            background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
-            background-repeat: repeat;
-            background-size: auto;
+        /* Apply background to the whole page */
+        .stApp {
+            background: linear-gradient(to bottom, #f8f9fa, #e3e7ed);
+        }
+
+        /* Style for text areas and file upload boxes */
+        .stTextArea, .stFileUploader {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style the headers for better visibility */
+        h1 {
+            color: #2c3e50;
+            text-align: center;
         }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 # Session state for history

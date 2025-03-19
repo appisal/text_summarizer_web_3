@@ -9,6 +9,7 @@ from docx import Document
 import pdfplumber
 from gtts import gTTS
 import qrcode
+from PIL import Image
 st.markdown("""
     <style>
         /* Apply background to the whole page */
@@ -88,12 +89,27 @@ def generate_share_links(summary):
     }
 
 # Function to generate a QR code
-def generate_qr_code(summary):
-    qr = qrcode.make(summary)
-    buffer = BytesIO()
-    qr.save(buffer, format="PNG")
-    buffer.seek(0)
-    return buffer
+def generate_qr(data):
+    qr = qrcode.QRCode(
+        version=1,  # Controls size (1 = smallest, 40 = largest)
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=5,  # Adjust this to make the QR smaller
+        border=2  # Reduce border size
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    
+    qr_img = qr.make_image(fill="black", back_color="white")
+    return qr_img
+
+st.title("QR Code Generator")
+
+# User input for QR Code
+qr_text = st.text_input("Enter text or URL for QR Code:", "https://example.com")
+
+if st.button("Generate QR Code"):
+    qr_image = generate_qr(qr_text)
+    st.image(qr_image, use_container_width=False)  # Show QR Code
 
 # Function to create share buttons with icons
 def create_share_buttons(summary):
@@ -148,7 +164,8 @@ def create_share_buttons(summary):
     # Display QR code
     st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
     qr_buffer = generate_qr_code(summary)
-    st.image(qr_buffer, caption="QR Code for Sharing", use_column_width=False)
+    st.image(image, use_container_width=True)
+
    
   
 

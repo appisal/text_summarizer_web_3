@@ -49,53 +49,6 @@ def download_audio(summary):
     buffer.seek(0)
     return buffer
 
-# Function to generate sharing links
-def generate_share_links(summary):
-    encoded_summary = urllib.parse.quote(summary)
-    return {
-        "WhatsApp": f"https://wa.me/?text={encoded_summary}",
-        "Twitter": f"https://twitter.com/intent/tweet?text={encoded_summary}",
-        "Email": f"mailto:?subject=Summary&body={encoded_summary}",
-        "LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
-    }
-
-# Function to create share buttons with icons
-def create_share_buttons(summary):
-    share_links = generate_share_links(summary)
-    share_html = f"""
-    <style>
-        .share-btns {{
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }}
-        .share-btns a img {{
-            width: 40px;
-            height: 40px;
-            transition: transform 0.3s ease-in-out;
-        }}
-        .share-btns a img:hover {{
-            transform: scale(1.2);
-        }}
-    </style>
-    <div class="share-btns">
-        <a href="{share_links['WhatsApp']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
-        </a>
-        <a href="{share_links['Twitter']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/en/6/60/Twitter_Logo_as_of_2021.svg">
-        </a>
-        <a href="{share_links['Email']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28iOS%29.svg">
-        </a>
-        <a href="{share_links['LinkedIn']}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png">
-        </a>
-    </div>
-    """
-    st.markdown(share_html, unsafe_allow_html=True)
-
 # UI Setup
 st.markdown("""
     <div style="text-align: center;">
@@ -103,7 +56,6 @@ st.markdown("""
         <h1 style="margin-top: 5px;">🚀 QuickText - Text Processor</h1>
     </div>
 """, unsafe_allow_html=True)
-
 
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "History"])
@@ -128,6 +80,27 @@ if option == "Single File":
         with col2:
             max_length = st.slider("📏 Max length:", 50, 500, 200)
 
+        # ✅ NEW: Live Summary Preview with Animation & Highlight
+        preview_text = text[:max_length]
+        st.markdown("""
+        <style>
+            .summary-box {
+                padding: 10px;
+                border-radius: 8px;
+                background: #f0f8ff;
+                font-weight: bold;
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            @keyframes fadeIn {
+                0% { opacity: 0; transform: translateY(-10px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<h3>👀 Live Summary Preview:</h3>", unsafe_allow_html=True)
+        st.markdown(f'<div class="summary-box">{preview_text}</div>', unsafe_allow_html=True)
+
         if st.button("📑 Process", use_container_width=True):
             processed_text = text[:max_length]
             st.markdown("<h3>📌 Processed Text:</h3>", unsafe_allow_html=True)
@@ -141,10 +114,6 @@ if option == "Single File":
                 st.download_button("📝 Word", download_word(processed_text), file_name="processed_text.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
             with col3:
                 st.download_button("🔊 Audio", download_audio(processed_text), file_name="processed_text.mp3", mime="audio/mp3")
-
-            # Share Buttons
-            st.markdown("<h3 style='text-align: center;'>📢 Share</h3>", unsafe_allow_html=True)
-            create_share_buttons(processed_text)
 
 elif option == "Bulk File Processing":
     uploaded_files = st.file_uploader("Upload multiple files", type=["pdf", "docx"], accept_multiple_files=True)
@@ -160,6 +129,5 @@ elif option == "History":
     for i, text in enumerate(reversed(st.session_state.summary_history)):
         with st.expander(f"📄 Entry {len(st.session_state.summary_history) - i}"):
             st.write(text)
-            create_share_buttons(text)
 
 st.markdown("<hr><p style='text-align: center;'>🔗 QuickText - Text Processor</p>", unsafe_allow_html=True)

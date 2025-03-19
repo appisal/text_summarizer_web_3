@@ -8,6 +8,7 @@ from reportlab.pdfgen import canvas
 from docx import Document
 import pdfplumber
 from gtts import gTTS
+import qrcode
 st.markdown("""
     <style>
         /* Apply background to the whole page */
@@ -81,10 +82,19 @@ def generate_share_links(summary):
         "WhatsApp": f"https://wa.me/?text={encoded_summary}",
         "Twitter": f"https://twitter.com/intent/tweet?text={encoded_summary}",
         "Email": f"mailto:?subject=Summary&body={encoded_summary}",
-        "LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}"
+        "LinkedIn": f"https://www.linkedin.com/sharing/share-offsite/?url={encoded_summary}",
+        "Facebook": f"https://www.facebook.com/sharer/sharer.php?u={encoded_summary}",
+        "Telegram": f"https://t.me/share/url?url={encoded_summary}"
     }
 
-# Function to create share buttons with icons
+# Function to generate a QR code
+def generate_qr_code(summary):
+    qr = qrcode.make(summary)
+    buffer = BytesIO()
+    qr.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer
+
 # Function to create share buttons with icons
 def create_share_buttons(summary):
     share_links = generate_share_links(summary)
@@ -124,11 +134,21 @@ def create_share_buttons(summary):
         <a href="{share_links['LinkedIn']}" target="_blank" class="share-btn">
             <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn">
         </a>
+        <a href="{share_links['Facebook']}" target="_blank" class="share-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook">
+        </a>
+        <a href="{share_links['Telegram']}" target="_blank" class="share-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+        </a>
     </div>
     """
 
     st.markdown(share_html, unsafe_allow_html=True)
 
+    # Display QR code
+    st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
+    qr_buffer = generate_qr_code(summary)
+    st.image(qr_buffer, caption="QR Code for Sharing", use_column_width=False)
    
   
 

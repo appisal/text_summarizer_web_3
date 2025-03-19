@@ -9,7 +9,6 @@ from docx import Document
 import pdfplumber
 from gtts import gTTS
 st.markdown("""
-st.markdown("""
     <style>
         /* Apply background to the whole page */
         .stApp {
@@ -31,6 +30,7 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 

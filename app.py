@@ -15,6 +15,16 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+st.markdown("""
+    <style>
+        body {
+            background-color: #f5f7fa;
+            background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+            background-repeat: repeat;
+            background-size: auto;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 
 # Session state for history

@@ -94,7 +94,7 @@ def generate_qr_code(summary):
     qr = qrcode.QRCode(
         version=1,  # Controls the complexity (1 is smallest)
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=5,  # Reduce this for a smaller QR code
+        box_size=3,  # Reduce this for a smaller QR code
         border=2     # Controls the white border (default is 4)
     )
     qr.add_data(summary)

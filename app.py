@@ -89,12 +89,14 @@ def generate_share_links(summary):
     }
 
 # Function to generate a QR code
+
+
 def generate_qr(data):
     qr = qrcode.QRCode(
-        version=1,  # Controls size (1 = smallest, 40 = largest)
+        version=1,  # Keeps the QR version small
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=5,  # Adjust this to make the QR smaller
-        border=2  # Reduce border size
+        box_size=5,  # Reduce the box size to make QR smaller
+        border=2  # Reduce border thickness
     )
     qr.add_data(data)
     qr.make(fit=True)
@@ -102,14 +104,6 @@ def generate_qr(data):
     qr_img = qr.make_image(fill="black", back_color="white")
     return qr_img
 
-st.title("QR Code Generator")
-
-# User input for QR Code
-qr_text = st.text_input("Enter text or URL for QR Code:", "https://example.com")
-
-if st.button("Generate QR Code"):
-    qr_image = generate_qr(qr_text)
-    st.image(qr_image, use_container_width=False)  # Show QR Code
 
 # Function to create share buttons with icons
 def create_share_buttons(summary):

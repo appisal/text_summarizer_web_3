@@ -99,7 +99,7 @@ def create_share_buttons(summary):
 # UI Setup
 st.markdown("""
     <div style="text-align: center;">
-        <img src="https://imgur.com/a/sbYkGtD" alt="QuickText Logo" width="150">
+        <img src="YOUR_LOGO_URL_HERE" alt="QuickText Logo" width="150">
         <h1>🚀 QuickText - Text Processor</h1>
     </div>
 """, unsafe_allow_html=True)

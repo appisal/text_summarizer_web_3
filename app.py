@@ -97,7 +97,12 @@ def create_share_buttons(summary):
     st.markdown(share_html, unsafe_allow_html=True)
 
 # UI Setup
-st.markdown("<h1 style='text-align: center;'>🚀 QuickText - Text Processor</h1>", unsafe_allow_html=True)
+st.markdown("""
+    <div style="text-align: center;">
+        <img src="https://imgur.com/a/sbYkGtD" alt="QuickText Logo" width="150">
+        <h1>🚀 QuickText - Text Processor</h1>
+    </div>
+""", unsafe_allow_html=True)
 
 st.sidebar.title("⚡ Features")
 option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "History"])
@@ -116,8 +121,11 @@ if option == "Single File":
         text = st.text_area("✍️ Paste your text here:", height=200)
 
     if text.strip():
-        max_length = st.slider("📏 Max length:", 50, 500, 200)
-        min_length = st.slider("📏 Min length:", 10, 100, 50)
+        col1, col2 = st.columns(2)
+        with col1:
+            min_length = st.slider("📏 Min length:", 10, 100, 50)
+        with col2:
+            max_length = st.slider("📏 Max length:", 50, 500, 200)
 
         if st.button("📑 Process", use_container_width=True):
             processed_text = text[:max_length]

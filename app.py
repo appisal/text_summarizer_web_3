@@ -90,24 +90,12 @@ def generate_share_links(summary):
     }
 
 # Function to generate a QR code
-def generate_qr_code(data):
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=5,
-        border=2
-    )
-    qr.add_data(data)  # Make sure this line is indented correctly
-    qr.make(fit=True)
-
-    img = qr.make_image(fill="black", back_color="white")
-    
-    qr_buffer = BytesIO()
-    img.save(qr_buffer, format="PNG")
-    qr_buffer.seek(0)
-
-    return qr_buffer
-
+def generate_qr_code(summary):
+    qr = qrcode.make(summary)
+    buffer = BytesIO()
+    qr.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer
 
 # Function to create share buttons with icons
 def create_share_buttons(summary):
@@ -158,24 +146,11 @@ def create_share_buttons(summary):
     """
 
     st.markdown(share_html, unsafe_allow_html=True)
-    def generate_qr_code(data):
-        qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=5,  # Adjust size
-        border=2
-    )
-    qr.add_data(data)
-    qr.make(fit=True)
 
-    img = qr.make_image(fill="black", back_color="white")
-    
-    # Convert to BytesIO buffer for Streamlit
-    qr_buffer = BytesIO()
-    img.save(qr_buffer, format="PNG")
-    qr_buffer.seek(0)
-    
-    return qr_buffer
+    # Display QR code
+    st.markdown("<h4 style='text-align: center;'>📲 Scan QR Code to Share</h4>", unsafe_allow_html=True)
+    qr_buffer = generate_qr_code(summary)
+    st.image(qr_buffer, caption="QR Code for Sharing", use_column_width=False)
 
    
    

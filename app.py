@@ -1,133 +1,36 @@
-import streamlit as st
-from io import BytesIO
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-import seaborn as sns
-import urllib.parse  
-from reportlab.pdfgen import canvas
-from docx import Document
-import pdfplumber
-from gtts import gTTS
+# Function to create share buttons with icons
+def create_share_buttons(summary):
+    share_links = generate_share_links(summary)
 
-# Session state for history
-if "summary_history" not in st.session_state:
-    st.session_state.summary_history = []
+    st.markdown("""
+    <style>
+        .share-btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .share-btn img {
+            width: 35px;
+            height: 35px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .share-btn img:hover {
+            transform: scale(1.2);
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-# PDF & DOCX Upload Support
-def extract_text_from_pdf(uploaded_file):
-    with pdfplumber.open(uploaded_file) as pdf:
-        return "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
-
-def extract_text_from_docx(uploaded_file):
-    doc = Document(uploaded_file)
-    return "\n".join([para.text for para in doc.paragraphs])
-
-# Function to download summary as PDF
-def download_pdf(summary):
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer)
-    pdf.drawString(100, 750, "Summary Report")
-    pdf.drawString(100, 730, summary)
-    pdf.save()
-    buffer.seek(0)
-    return buffer
-
-# Function to download summary as Word
-def download_word(summary):
-    doc = Document()
-    doc.add_paragraph(summary)
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer
-
-# Function to download summary as audio
-def download_audio(summary):
-    tts = gTTS(summary, lang="en")
-    buffer = BytesIO()
-    tts.write_to_fp(buffer)
-    buffer.seek(0)
-    return buffer
-
-# UI Setup
-st.markdown("""
-    <div style="text-align: center;">
-        <img src="https://i.imgur.com/55eTSwu.png" alt="QuickText Logo" style="width: 120px; margin-bottom: -10px;">
-        <h1 style="margin-top: 5px;">🚀 QuickText - Text Processor</h1>
-    </div>
-""", unsafe_allow_html=True)
-
-st.sidebar.title("⚡ Features")
-option = st.sidebar.radio("Choose an option:", ["Single File", "Bulk File Processing", "History"])
-
-if option == "Single File":
-    st.markdown("<h3>📂 Upload a file or paste text.</h3>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Choose a file", type=["pdf", "docx"])
-    text = ""
-
-    if uploaded_file:
-        if uploaded_file.type == "application/pdf":
-            text = extract_text_from_pdf(uploaded_file)
-        elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            text = extract_text_from_docx(uploaded_file)
-    else:
-        text = st.text_area("✍️ Paste your text here:", height=200)
-
-    if text.strip():
-        col1, col2 = st.columns(2)
-        with col1:
-            min_length = st.slider("📏 Min length:", 10, 100, 50)
-        with col2:
-            max_length = st.slider("📏 Max length:", 50, 500, 200)
-
-        # ✅ NEW: Live Summary Preview with Animation & Highlight
-        preview_text = text[:max_length]
-        st.markdown("""
-        <style>
-            .summary-box {
-                padding: 10px;
-                border-radius: 8px;
-                background: #f0f8ff;
-                font-weight: bold;
-                animation: fadeIn 0.5s ease-in-out;
-            }
-            @keyframes fadeIn {
-                0% { opacity: 0; transform: translateY(-10px); }
-                100% { opacity: 1; transform: translateY(0); }
-            }
-        </style>
-        """, unsafe_allow_html=True)
-
-        st.markdown("<h3>👀 Live Summary Preview:</h3>", unsafe_allow_html=True)
-        st.markdown(f'<div class="summary-box">{preview_text}</div>', unsafe_allow_html=True)
-
-        if st.button("📑 Process", use_container_width=True):
-            processed_text = text[:max_length]
-            st.markdown("<h3>📌 Processed Text:</h3>", unsafe_allow_html=True)
-            st.success(processed_text)
-
-            # Download Buttons
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.download_button("📄 PDF", download_pdf(processed_text), file_name="processed_text.pdf", mime="application/pdf")
-            with col2:
-                st.download_button("📝 Word", download_word(processed_text), file_name="processed_text.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-            with col3:
-                st.download_button("🔊 Audio", download_audio(processed_text), file_name="processed_text.mp3", mime="audio/mp3")
-
-elif option == "Bulk File Processing":
-    uploaded_files = st.file_uploader("Upload multiple files", type=["pdf", "docx"], accept_multiple_files=True)
-    if uploaded_files:
-        for file in uploaded_files:
-            text = extract_text_from_pdf(file) if file.type == "application/pdf" else extract_text_from_docx(file)
-            processed_text = text[:200]
-            st.markdown(f"### 📜 Processed Text for {file.name}")
-            st.success(processed_text)
-
-elif option == "History":
-    st.subheader("📜 History")
-    for i, text in enumerate(reversed(st.session_state.summary_history)):
-        with st.expander(f"📄 Entry {len(st.session_state.summary_history) - i}"):
-            st.write(text)
-
-st.markdown("<hr><p style='text-align: center;'>🔗 QuickText - Text Processor</p>", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        if st.button("WhatsApp 📲", key="wa_share"):
+            st.markdown(f'<script>window.open("{share_links["WhatsApp"]}");</script>', unsafe_allow_html=True)
+    with col2:
+        if st.button("Twitter 🐦", key="tw_share"):
+            st.markdown(f'<script>window.open("{share_links["Twitter"]}");</script>', unsafe_allow_html=True)
+    with col3:
+        if st.button("Email ✉️", key="email_share"):
+            st.markdown(f'<script>window.open("{share_links["Email"]}");</script>', unsafe_allow_html=True)
+    with col4:
+        if st.button("LinkedIn 🔗", key="linkedin_share"):
+            st.markdown(f'<script>window.open("{share_links["LinkedIn"]}");</script>', unsafe_allow_html=True)

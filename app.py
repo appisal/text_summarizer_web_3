@@ -159,7 +159,7 @@ def create_share_buttons(summary):
 
     st.markdown(share_html, unsafe_allow_html=True)
     def generate_qr_code(data):
-    qr = qrcode.QRCode(
+        qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=5,  # Adjust size
